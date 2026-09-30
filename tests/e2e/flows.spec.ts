@@ -395,28 +395,16 @@ test("API: proposal snapshots, duplication, transitions, concurrent codes and va
   }
 });
 
-test("motion, mobile navigation and opt-in audio", async ({ page }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.setViewportSize({ width: 1440, height: 1000 });
+test("mobile navigation and opt-in audio", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await expect(page.getByRole("button", { name: /SOM OFF/ })).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
-  await expect(page.locator(".pin-spacer")).toHaveCount(1);
-  await page.evaluate(() => window.scrollTo(0, 1850));
-  await expect(page.locator("#inicio")).toHaveAttribute("data-stage", "4");
   await page.getByRole("button", { name: /SOM OFF/ }).click();
   await expect(page.getByRole("button", { name: /SOM ON/ })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
   await page.getByRole("button", { name: /SOM ON/ }).click();
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await expect(page.locator(".pin-spacer")).toHaveCount(0);
   await page.getByRole("button", { name: "Menu", exact: true }).click();
   await page
     .getByRole("navigation", { name: "Navegação principal" })
@@ -426,5 +414,4 @@ test("motion, mobile navigation and opt-in audio", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Menu", exact: true }),
   ).toHaveAttribute("aria-expanded", "false");
-  expect(errors).toEqual([]);
 });

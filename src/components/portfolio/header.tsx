@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { SoundControl } from "./sound-control";
 import { audioEngine } from "@/lib/audio";
 const links = [
   ["sobre", "Sobre"],
@@ -12,8 +13,6 @@ const links = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
-  const [sound, setSound] = useState(false);
-  const [soundHint, setSoundHint] = useState("");
   const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -21,7 +20,7 @@ export function Header() {
     const restoreSound = () => {
       try {
         if (localStorage.getItem("kaue.sound.v1") === "on") {
-          void audioEngine.enable().then(setSound);
+          void audioEngine.enable();
         }
       } catch {}
     };
@@ -89,20 +88,7 @@ export function Header() {
         ))}
       </nav>
       <div className="header-controls">
-        <button
-          className="sound"
-          aria-pressed={sound}
-          onClick={async () => {
-            const enabled = await audioEngine.toggle();
-            setSound(enabled);
-            setSoundHint(
-              !enabled && !sound ? "Áudio indisponível ou desativado." : "",
-            );
-          }}
-        >
-          {sound ? "SOM ON" : "SOM OFF"}{" "}
-          <span aria-hidden="true">{sound ? "▂▄▆" : "▂▂▂"}</span>
-        </button>
+        <SoundControl />
         <button
           ref={toggle}
           className="menu-toggle"
@@ -113,9 +99,6 @@ export function Header() {
           {open ? "Fechar" : "Menu"}
         </button>
       </div>
-      <span className="sr-only" role="status">
-        {soundHint}
-      </span>
     </header>
   );
 }

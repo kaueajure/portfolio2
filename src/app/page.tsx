@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Header } from "@/components/portfolio/header";
+import { CinematicIntro } from "@/components/portfolio/intro/cinematic-intro";
 import { Intro } from "@/components/portfolio/intro";
 import { About, Projects, Stack } from "@/components/portfolio/sections";
 import { GitHub } from "@/components/portfolio/github";
@@ -37,26 +38,32 @@ export function generateMetadata() {
 export default function Home() {
   return (
     <>
-      <Header />
-      <main id="conteudo" className="portfolio">
-        <Intro />
-        <About />
-        <Projects />
-        <Stack />
-        <section id="github" className="github-section section">
-          <Suspense
-            fallback={
-              <div role="status">
-                <h2>Atividade pública.</h2>
-                <p>Consultando GitHub…</p>
-              </div>
-            }
-          >
-            <GitHub />
-          </Suspense>
-        </section>
-        <Contact />
-      </main>
+      <noscript>
+        <style>{`.cinematic-opening { display: none !important; }`}</style>
+      </noscript>
+      <CinematicIntro />
+      <div id="portfolio-page">
+        <Header />
+        <main id="conteudo" className="portfolio">
+          <Intro />
+          <About />
+          <Projects />
+          <Stack />
+          <section id="github" className="github-section section">
+            <Suspense
+              fallback={
+                <div role="status">
+                  <h2>Atividade pública.</h2>
+                  <p>Consultando GitHub…</p>
+                </div>
+              }
+            >
+              <GitHub />
+            </Suspense>
+          </section>
+          <Contact />
+        </main>
+      </div>
       <Motion />
     </>
   );
