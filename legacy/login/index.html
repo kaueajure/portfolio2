@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#15181C">
+  <title>Login — Painel Kauê Ajure</title>
+  <link rel="icon" href="../assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="../assets/favicon-32.png" sizes="32x32">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../admin/css/panel.css">
+</head>
+<body class="panel-body login-body">
+  <a class="skip-link" href="#login-form">Ir para o formulário</a>
+  <div class="noise" aria-hidden="true"></div>
+
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="login-title">
+      <div class="login-brand">
+        <img src="../assets/logo-preta.png" alt="" width="40" height="40" decoding="async">
+        <div>
+          <span class="section-tag">Painel</span>
+          <h1 id="login-title">Entrar</h1>
+        </div>
+      </div>
+
+      <p class="login-lead" id="login-lead" hidden></p>
+      <p class="login-error" id="login-error" role="alert" hidden></p>
+
+      <form id="login-form" class="panel-form" novalidate>
+        <label class="field">
+          <span>E-mail</span>
+          <input type="email" name="email" id="field-email" autocomplete="username" placeholder="seu@email.com" required>
+        </label>
+
+        <div id="step-password">
+          <label class="field">
+            <span>Senha</span>
+            <input type="password" name="password" id="field-password" autocomplete="current-password" placeholder="••••••••" required>
+          </label>
+        </div>
+
+        <div id="step-setup" hidden>
+          <label class="field">
+            <span>Nova senha</span>
+            <input type="password" name="newPassword" id="field-new-password" autocomplete="new-password" placeholder="Mínimo 12 caracteres" minlength="12">
+          </label>
+          <label class="field">
+            <span>Confirmar senha</span>
+            <input type="password" name="passwordConfirm" id="field-password-confirm" autocomplete="new-password" placeholder="Repita a senha" minlength="12">
+          </label>
+        </div>
+
+        <button class="btn btn-primary" type="submit" id="login-submit">Entrar</button>
+      </form>
+
+      <p class="login-note">
+        <a href="../">← Voltar ao portfólio</a>
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="login.js"></script>
+</body>
+</html>

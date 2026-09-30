@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfólio de Kauê Ajure, desenvolvedor Full Stack focado em sistemas de gestão, produtos SaaS e aplicações web completas.">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="assets/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="theme-color" content="#15181C">
+  <title>Kauê Ajure — Desenvolvedor Full Stack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.css">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+  <div class="scroll-progress" aria-hidden="true"><span></span></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="site-header" data-header>
+    <div class="shell header-bar">
+      <a class="brand" href="#inicio" aria-label="Kauê Ajure — voltar ao início">
+        <img class="brand-logo" src="assets/logo-preta.png" alt="" width="36" height="36" decoding="async">
+        <span class="brand-name">Kauê Ajure</span>
+      </a>
+
+      <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal">
+        <span></span><span></span>
+      </button>
+
+      <nav class="site-nav" id="menu-principal" aria-label="Navegação principal">
+        <a href="#sobre">Sobre</a>
+        <a href="#projetos">Projetos</a>
+        <a href="#stack">Stack</a>
+        <a href="#github">GitHub</a>
+        <a href="#contato" class="nav-cta">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" id="inicio" aria-labelledby="hero-title">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <span class="section-tag">Portfólio</span>
+          <h1 id="hero-title" class="hero-title">Kauê Ajure</h1>
+          <p class="hero-lead">Sistemas de gestão e produtos SaaS — da interface ao banco e ao deploy.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary magnetic" href="#projetos">Ver projetos</a>
+            <a class="btn btn-ghost magnetic" href="#contato">Falar comigo</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel" aria-label="Resumo profissional">
+          <div class="hero-panel-top">
+            <span class="pill"><i class="pulse"></i> Disponível para projetos</span>
+            <p>Desenvolvedor Full Stack</p>
+          </div>
+          <ul class="hero-panel-list">
+            <li><strong>Foco</strong><span>SaaS · gestão · operação</span></li>
+            <li><strong>Front</strong><span>React · Next.js · TypeScript</span></li>
+            <li><strong>Back</strong><span>Node.js · MySQL · tempo real</span></li>
+            <li><strong>Entrega</strong><span>API · workers · deploy Linux</span></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="about" id="sobre" aria-labelledby="about-title">
+      <div class="shell about-grid">
+        <div class="about-intro reveal">
+          <span class="section-tag">Sobre</span>
+          <h2 id="about-title">Desenvolvo a interface e o que acontece por trás dela.</h2>
+          <p class="about-lead">Meus projetos lidam com organização: chamados, demandas, prazos, usuários e informações no mesmo lugar.</p>
+          <p>Trabalho com React e TypeScript no front, Node.js no back — autenticação, permissões, APIs, banco, tempo real, workers e deploy em Linux.</p>
+        </div>
+        <ul class="about-layers reveal" aria-label="Camadas de atuação">
+          <li>
+            <strong>Experiência</strong>
+            <span>React · Next.js</span>
+          </li>
+          <li>
+            <strong>Aplicação</strong>
+            <span>Node.js · APIs</span>
+          </li>
+          <li>
+            <strong>Dados</strong>
+            <span>MySQL · Drizzle</span>
+          </li>
+          <li>
+            <strong>Operação</strong>
+            <span>Workers · Linux</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="projects" id="projetos" aria-labelledby="projects-title">
+      <div class="shell">
+        <div class="section-head reveal">
+          <img class="section-logo section-logo--light" src="assets/logo-branca.png" alt="" width="40" height="40" decoding="async">
+          <div>
+            <span class="section-tag">Projetos</span>
+            <h2 id="projects-title">Quatro projetos selecionados.</h2>
+          </div>
+        </div>
+
+        <div class="project-list">
+          <article class="project reveal">
+            <div class="project-main">
+              <div class="project-kicker">
+                <span>Produto · Imobiliário</span>
+                <a class="project-link magnetic" href="https://github.com/kaueajure/alonso" target="_blank" rel="noreferrer">GitHub ↗</a>
+              </div>
+              <h3>Alonso</h3>
+              <p class="project-statement">Presença digital da Alonso Negócios Imobiliários para busca, contato e administração do catálogo.</p>
+              <p class="project-desc">Site público com pesquisa e contatos contextuais, além de área administrativa com autenticação, sessão, cadastro de imóveis, mídias e painel operacional sobre MySQL.</p>
+              <ul class="tech-list" aria-label="Tecnologias do Alonso">
+                <li>Next.js</li><li>React</li><li>TypeScript</li><li>MySQL</li><li>Zod</li><li>Vitest</li>
+              </ul>
+            </div>
+            <div class="project-visual visual-alonso" aria-hidden="true">
+              <div class="viz-label">Catálogo</div>
+              <div class="alonso-board">
+                <div class="alonso-focus">Imóveis</div>
+                <span>Busca</span>
+                <span>Favoritos</span>
+                <span>Contato</span>
+                <span>Admin</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project reveal">
+            <div class="project-main">
+              <div class="project-kicker">
+                <span>SaaS · Atendimento</span>
+                <a class="project-link magnetic" href="https://github.com/kaueajure/gestifique" target="_blank" rel="noreferrer">GitHub ↗</a>
+              </div>
+              <h3>Gestifique</h3>
+              <p class="project-statement">Chamados, clientes, SLA e canais de atendimento na mesma aplicação.</p>
+              <p class="project-desc">Portal do cliente, base de conhecimento, perfis, relatórios, e-mail e WhatsApp, Socket.IO e worker para tarefas em background.</p>
+              <ul class="tech-list" aria-label="Tecnologias do Gestifique">
+                <li>React</li><li>TypeScript</li><li>Node.js</li><li>Express</li><li>MySQL</li><li>Redis</li><li>Socket.IO</li>
+              </ul>
+            </div>
+            <div class="project-visual visual-ticket" aria-hidden="true">
+              <div class="viz-label">Fluxo</div>
+              <div class="ticket-rail"><span>E-mail</span><span>Portal</span><span>WhatsApp</span></div>
+              <div class="ticket-hub">SLA</div>
+              <div class="ticket-out"><span>Automação</span><span>Worker</span><span>Relatório</span></div>
+            </div>
+          </article>
+
+          <article class="project reveal">
+            <div class="project-main">
+              <div class="project-kicker">
+                <span>Produto · Entretenimento</span>
+                <a class="project-link magnetic" href="https://github.com/kaueajure/flixa" target="_blank" rel="noreferrer">GitHub ↗</a>
+              </div>
+              <h3>Flixa</h3>
+              <p class="project-statement">Catálogo, biblioteca, amigos, fóruns e esportes em uma plataforma.</p>
+              <p class="project-desc">Autenticação, perfis, presença em tempo real, Drizzle e testes de navegação, reprodução e recursos sociais.</p>
+              <ul class="tech-list" aria-label="Tecnologias do Flixa">
+                <li>Next.js</li><li>React</li><li>TypeScript</li><li>Drizzle</li><li>MySQL</li><li>Ably</li><li>Cloudflare</li>
+              </ul>
+            </div>
+            <div class="project-visual visual-flixa" aria-hidden="true">
+              <div class="viz-label">Módulos</div>
+              <div class="flixa-grid">
+                <div class="flixa-hero">Catálogo</div>
+                <span>Biblioteca</span><span>Amigos</span><span>Esportes</span><span>Fóruns</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="project reveal">
+            <div class="project-main">
+              <div class="project-kicker">
+                <span>Sistema · Operação</span>
+                <a class="project-link magnetic" href="https://github.com/kaueajure/portalmeta" target="_blank" rel="noreferrer">GitHub ↗</a>
+              </div>
+              <h3>Portal Meta</h3>
+              <p class="project-statement">Demandas, agenda, chamados e obrigações por município.</p>
+              <p class="project-desc">Usuários e permissões, indicadores, auditoria, WhatsApp, tempo real e worker em background.</p>
+              <ul class="tech-list" aria-label="Tecnologias do Portal Meta">
+                <li>React</li><li>TypeScript</li><li>Node.js</li><li>Express</li><li>MySQL</li><li>Redis</li><li>Socket.IO</li>
+              </ul>
+            </div>
+            <div class="project-visual visual-portal" aria-hidden="true">
+              <div class="viz-label">Painel</div>
+              <div class="portal-summary">Demandas</div>
+              <div class="portal-cells">
+                <span>Agenda</span><span>SLA</span><span>Logs</span>
+                <span>Municípios</span><span>Usuários</span><span>Relatórios</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="stack" id="stack" aria-labelledby="stack-title">
+      <div class="shell">
+        <div class="section-head reveal">
+          <span class="section-tag">Stack</span>
+          <h2 id="stack-title">Ferramentas do dia a dia.</h2>
+          <p>React e TypeScript nos três projetos. Node.js, MySQL e tempo real na aplicação e na infraestrutura.</p>
+        </div>
+
+        <div class="stack-grid reveal">
+          <article class="stack-block">
+            <h3>Interface</h3>
+            <div class="stack-items"><span>React</span><span>Next.js</span><span>TypeScript</span><span>Tailwind</span><span>Vite</span></div>
+          </article>
+          <article class="stack-block">
+            <h3>Aplicação</h3>
+            <div class="stack-items"><span>Node.js</span><span>Express</span><span>REST</span><span>Socket.IO</span><span>Workers</span></div>
+          </article>
+          <article class="stack-block">
+            <h3>Dados</h3>
+            <div class="stack-items"><span>MySQL</span><span>MariaDB</span><span>Drizzle</span><span>Redis</span></div>
+          </article>
+          <article class="stack-block">
+            <h3>Operação</h3>
+            <div class="stack-items"><span>Linux</span><span>Git</span><span>Cloudflare</span><span>JWT</span><span>Testes</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="github" id="github" aria-labelledby="github-title">
+      <div class="shell">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-tag">GitHub</span>
+            <h2 id="github-title">Atividade pública.</h2>
+          </div>
+          <div class="api-status" aria-live="polite"><i></i><span data-api-status>Carregando API</span></div>
+        </div>
+
+        <div class="github-board reveal">
+          <div class="metrics">
+            <div class="metric">
+              <strong data-public-repos>4</strong>
+              <span>repositórios</span>
+            </div>
+            <div class="metric">
+              <strong data-primary-language>TypeScript</strong>
+              <span>linguagem principal</span>
+            </div>
+            <div class="metric">
+              <strong data-account-since>jun / 2025</strong>
+              <span>desde</span>
+            </div>
+          </div>
+
+          <div class="github-panels">
+            <div class="panel">
+              <div class="panel-label"><span>Linguagens</span><small data-language-note>consultando</small></div>
+              <div class="language-bars" data-language-bars>
+                <p class="language-fallback">TypeScript é a linguagem principal nos três projetos.</p>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-label"><span>Repositórios</span><small>via GitHub</small></div>
+              <div class="repo-list" data-repo-list>
+                <a href="https://github.com/kaueajure/alonso" target="_blank" rel="noreferrer"><span>alonso</span><small>TypeScript</small></a>
+                <a href="https://github.com/kaueajure/gestifique" target="_blank" rel="noreferrer"><span>gestifique</span><small>TypeScript</small></a>
+                <a href="https://github.com/kaueajure/flixa" target="_blank" rel="noreferrer"><span>flixa</span><small>TypeScript</small></a>
+                <a href="https://github.com/kaueajure/portalmeta" target="_blank" rel="noreferrer"><span>portalmeta</span><small>TypeScript</small></a>
+              </div>
+            </div>
+          </div>
+
+          <a class="github-cta magnetic" href="https://github.com/kaueajure" target="_blank" rel="noreferrer">
+            <span>Ver perfil no GitHub</span>
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact" id="contato" aria-labelledby="contact-title">
+      <div class="shell contact-inner">
+        <span class="section-tag reveal">Contato</span>
+        <h2 id="contact-title" class="reveal">Vamos conversar sobre o próximo sistema.</h2>
+        <div class="contact-actions reveal">
+          <a class="contact-email magnetic" href="mailto:kaueajure@gmail.com">kaueajure@gmail.com</a>
+          <button class="btn btn-ghost copy-email" type="button" data-copy-email>Copiar e-mail</button>
+        </div>
+        <footer class="site-footer reveal">
+          <div class="footer-brand">
+            <img src="assets/logo-preta.png" alt="" width="28" height="28" decoding="async">
+            <p>Kauê Ajure · Desenvolvedor Full Stack</p>
+          </div>
+          <div class="footer-links">
+            <a href="https://github.com/kaueajure" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/kaueajure/" target="_blank" rel="noreferrer">LinkedIn</a>
+            <a href="#inicio">Topo ↑</a>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

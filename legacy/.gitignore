@@ -1,0 +1,16 @@
+config/database.php
+uploads/clientes/*
+!uploads/clientes/.htaccess
+!uploads/clientes/.gitkeep
+!uploads/clientes/.gitignore
+storage/rate_limit/*
+!storage/rate_limit/.htaccess
+!storage/rate_limit/.gitkeep
+!storage/rate_limit/.gitignore
+storage/pdf_jobs/*
+!storage/pdf_jobs/.gitkeep
+storage/tessdata/*
+!storage/tessdata/.htaccess
+composer.phar
+.env
+.env.*

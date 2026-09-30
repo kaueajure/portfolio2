@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#15181C">
+  <title>Proposta — Kauê Ajure</title>
+  <link rel="icon" href="../assets/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="../assets/favicon-32.png" sizes="32x32">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="proposta.css">
+</head>
+<body class="proposta-body">
+  <a class="skip-link" href="#proposta-main">Ir para a proposta</a>
+  <div class="noise" aria-hidden="true"></div>
+
+  <dialog class="gate-dialog" id="gate-dialog" aria-labelledby="gate-title">
+    <form class="gate-card" id="gate-form" method="dialog">
+      <img class="gate-logo" src="../assets/logo-preta.png" alt="" width="44" height="44" decoding="async">
+      <p class="gate-kicker">Proposta comercial</p>
+      <h1 id="gate-title">Como podemos te chamar?</h1>
+      <p class="gate-lead" id="gate-lead">Antes de abrir a proposta, diga seu nome.</p>
+      <label class="gate-field">
+        <span>Seu nome</span>
+        <input type="text" id="gate-name" name="name" required minlength="2" maxlength="120" autocomplete="name" placeholder="Ex.: Ana Silva">
+      </label>
+      <p class="gate-error" id="gate-error" hidden role="alert"></p>
+      <button class="btn btn-primary gate-submit" type="submit">Ver proposta</button>
+    </form>
+  </dialog>
+
+  <header class="proposta-top">
+    <a class="proposta-brand" href="../">
+      <img src="../assets/logo-preta.png" alt="" width="36" height="36" decoding="async">
+      <span>Kauê Ajure</span>
+    </a>
+  </header>
+
+  <main id="proposta-main" class="proposta-shell">
+    <p id="proposta-loading" class="proposta-msg">Carregando…</p>
+    <p id="proposta-error" class="proposta-msg proposta-msg--error" hidden role="alert"></p>
+
+    <article id="proposta-view" class="proposta-doc" hidden>
+      <p class="proposta-status-banner" id="prop-banner" hidden></p>
+
+      <header class="proposta-hero">
+        <div class="proposta-hero-copy">
+          <p class="proposta-kicker" id="prop-code"></p>
+          <h1 id="prop-title"></h1>
+          <p class="proposta-valid" id="prop-valid" hidden></p>
+        </div>
+        <div class="proposta-hero-total" aria-label="Valor total">
+          <span>Total</span>
+          <strong id="prop-total"></strong>
+        </div>
+      </header>
+
+      <section class="proposta-block" aria-labelledby="items-title">
+        <h2 id="items-title">O que está incluso</h2>
+        <ul class="proposta-lines" id="prop-items"></ul>
+        <div class="proposta-sum" id="prop-sum">
+          <div class="proposta-sum-row">
+            <span>Subtotal</span>
+            <strong id="prop-subtotal"></strong>
+          </div>
+          <div class="proposta-sum-row" id="prop-discount-row" hidden>
+            <span id="prop-discount-label">Desconto</span>
+            <strong id="prop-discount"></strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="proposta-block" id="prop-scope-section" hidden>
+        <h2>Escopo</h2>
+        <p id="prop-scope" class="proposta-text"></p>
+      </section>
+
+      <section class="proposta-block" id="prop-conditions-section" hidden>
+        <h2>Condições</h2>
+        <p id="prop-conditions" class="proposta-text"></p>
+      </section>
+
+      <section class="proposta-cta" id="prop-actions" hidden>
+        <h2>Sua resposta</h2>
+        <p class="proposta-cta-lead">Se estiver tudo certo, aceite. Se preferir, recuse e deixe um comentário.</p>
+        <label class="gate-field">
+          <span>Mensagem <em>(opcional)</em></span>
+          <textarea id="prop-message" rows="3" maxlength="2000" placeholder="Algo que eu precise saber…"></textarea>
+        </label>
+        <div class="proposta-cta-row">
+          <button type="button" class="btn btn-ghost" id="prop-decline">Recusar</button>
+          <button type="button" class="btn btn-primary" id="prop-accept">Aceitar proposta</button>
+        </div>
+        <p id="prop-action-error" class="proposta-msg proposta-msg--error" hidden role="alert"></p>
+      </section>
+
+      <footer class="proposta-foot">
+        <a id="prop-pdf" class="btn btn-ghost" href="#" hidden>Baixar PDF</a>
+        <span class="proposta-viewer" id="prop-viewer" hidden></span>
+      </footer>
+    </article>
+  </main>
+
+  <script type="module" src="proposta.js"></script>
+</body>
+</html>
