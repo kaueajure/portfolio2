@@ -1,3 +1,4 @@
+import "@/components/admin/application.css";
 import { redirect } from "next/navigation";
 import { currentUser } from "@/lib/server/auth";
 import { AdminNav } from "@/components/admin/nav";

@@ -1,0 +1,205 @@
+/* Shared form and control primitives. Keep portfolio art direction scoped. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+.button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+  line-height: 1.3;
+  text-align: center;
+}
+
+button:hover,
+.button:hover {
+  border-color: var(--deep);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.primary {
+  background: var(--deep);
+  border-color: var(--deep);
+  color: white;
+}
+
+.primary:hover {
+  background: var(--ink);
+}
+
+.ghost {
+  background: transparent;
+}
+
+.danger,
+.urgent {
+  color: #95342c;
+}
+
+.text-button {
+  background: none;
+  border: 0;
+  padding-left: 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field > span {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #aebac3;
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 0.65rem 0.8rem;
+  color: var(--ink);
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input[type="file"] {
+  padding: 0.4rem;
+  max-width: 100%;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 0;
+  min-width: 0;
+}
+
+fieldset legend {
+  padding: 0 0.4rem;
+  font-weight: 600;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.wide {
+  grid-column: 1/-1;
+}
+
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+}
+
+.prewrap {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+dialog {
+  width: min(760px, calc(100% - 24px));
+  max-height: 90dvh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1.5rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+dialog::backdrop {
+  background: #101820a3;
+  backdrop-filter: blur(5px);
+}
+
+.dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dialog-head h2 {
+  margin: 0;
+}
+
+.dialog-head button {
+  font-size: 1.5rem;
+  padding: 0.2rem 0.9rem;
+}
+
+[role="alert"] {
+  color: #95342c;
+}
+
+[role="status"] {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .surface {
+    padding: 1rem;
+  }
+  dialog {
+    padding: 1rem;
+  }
+}

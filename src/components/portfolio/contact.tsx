@@ -1,43 +1,43 @@
 "use client";
 import { useState } from "react";
+import styles from "./portfolio.module.css";
 export function Contact() {
   const [message, setMessage] = useState("");
   return (
-    <section id="contato" className="contact section">
-      <span className="section-label">Contato / próximo projeto</span>
-      <h2 data-reveal>
-        Vamos conversar sobre
-        <br />
-        <em>o próximo sistema.</em>
-      </h2>
-      <div className="contact-actions">
-        <a className="contact-email magnetic" href="mailto:kaueajure@gmail.com">
+    <section
+      id="contato"
+      className={`${styles.contact} ${styles.container}`}
+      aria-labelledby="contact-heading"
+    >
+      <p className={styles.label}>05 / Próximo projeto</p>
+      <h2 id="contact-heading">Vamos construir o próximo sistema.</h2>
+      <p className={styles.contactIntro}>
+        Conte o problema, o contexto e o que precisa funcionar.
+      </p>
+      <div className={styles.contactActions}>
+        <a className={styles.email} href="mailto:kaueajure@gmail.com">
           kaueajure@gmail.com ↗
         </a>
-        <button
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText("kaueajure@gmail.com");
-              setMessage("E-mail copiado.");
-            } catch {
-              setMessage("Copie o endereço: kaueajure@gmail.com");
-            }
-          }}
-        >
-          Copiar e-mail
-        </button>
-        <span role="status">{message}</span>
-      </div>
-      <footer>
-        <p>Kauê Ajure · Desenvolvedor Full Stack</p>
-        <div>
-          <a
-            href="https://github.com/kaueajure"
-            target="_blank"
-            rel="noreferrer"
+        <div className={styles.copyGroup}>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText("kaueajure@gmail.com");
+                setMessage("E-mail copiado.");
+              } catch {
+                setMessage("Copie o endereço: kaueajure@gmail.com");
+              }
+            }}
           >
-            GitHub ↗
-          </a>
+            Copiar e-mail
+          </button>
+          <span role="status">{message}</span>
+        </div>
+      </div>
+      <footer className={styles.footer}>
+        <p>Kauê Ajure · Desenvolvimento de sistemas</p>
+        <nav aria-label="Links do rodapé">
           <a
             href="https://www.linkedin.com/in/kaueajure/"
             target="_blank"
@@ -45,8 +45,23 @@ export function Contact() {
           >
             LinkedIn ↗
           </a>
-          <a href="#inicio">Topo ↑</a>
-        </div>
+          <a
+            href="https://github.com/kaueajure"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub ↗
+          </a>
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(new Event("kaue:replay-opening"))
+            }
+          >
+            Rever abertura
+          </button>
+          <a href="#inicio">Voltar ao topo ↑</a>
+        </nav>
       </footer>
     </section>
   );

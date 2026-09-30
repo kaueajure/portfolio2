@@ -26,7 +26,7 @@ test("portfolio responsive, navigation and login", async ({ page }) => {
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    for (const id of ["sobre", "projetos", "stack", "github", "contato"])
+    for (const id of ["projetos", "sobre", "stack", "codigo", "contato"])
       await expect(page.locator(`#${id}`)).toBeAttached();
   }
   await page.goto("/admin/clientes");

@@ -1,3 +1,4 @@
+import "@/components/admin/application.css";
 import Link from "next/link";
 import { Login } from "@/components/admin/login";
 export const metadata = {

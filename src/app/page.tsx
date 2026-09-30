@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Header } from "@/components/portfolio/header";
 import { CinematicIntro } from "@/components/portfolio/intro/cinematic-intro";
 import { Intro } from "@/components/portfolio/intro";
@@ -7,6 +6,7 @@ import { GitHub } from "@/components/portfolio/github";
 import { Contact } from "@/components/portfolio/contact";
 import { Motion } from "@/components/portfolio/motion";
 import { appUrl } from "@/lib/server/http";
+import styles from "@/components/portfolio/portfolio.module.css";
 export function generateMetadata() {
   const url = appUrl();
   return {
@@ -15,55 +15,68 @@ export function generateMetadata() {
     openGraph: {
       title: "Kauê Ajure — Desenvolvedor Full Stack",
       description:
-        "Sistemas de gestão e produtos SaaS — da interface ao banco e ao deploy.",
+        "Sistemas de gestão e produtos SaaS, da interface ao banco e ao deploy.",
       url,
       locale: "pt_BR",
       type: "website",
       images: [
         {
-          url: "/assets/logo-preta.png",
-          width: 512,
-          height: 512,
-          alt: "Kauê Ajure",
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Kauê Ajure — sistemas em corte",
         },
       ],
     },
     twitter: {
-      card: "summary" as const,
+      card: "summary_large_image" as const,
       title: "Kauê Ajure — Desenvolvedor Full Stack",
-      images: ["/assets/logo-preta.png"],
+      images: ["/opengraph-image"],
     },
   };
 }
 export default function Home() {
   return (
     <>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `try{if(location.hash||localStorage.getItem('kaue.opening.seen')==='yes'||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.openingSkip='true'}catch(e){}`,
+        }}
+      />
       <noscript>
         <style>{`.cinematic-opening { display: none !important; }`}</style>
       </noscript>
       <CinematicIntro />
-      <div id="portfolio-page">
+      <div id="portfolio-page" className={styles.site}>
         <Header />
-        <main id="conteudo" className="portfolio">
+        <main id="conteudo">
           <Intro />
-          <About />
           <Projects />
+          <About />
           <Stack />
-          <section id="github" className="github-section section">
-            <Suspense
-              fallback={
-                <div role="status">
-                  <h2>Atividade pública.</h2>
-                  <p>Consultando GitHub…</p>
-                </div>
-              }
-            >
-              <GitHub />
-            </Suspense>
-          </section>
+          <GitHub />
           <Contact />
         </main>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ProfilePage",
+            mainEntity: {
+              "@type": "Person",
+              name: "Kauê Ajure",
+              url: appUrl(),
+              jobTitle: "Desenvolvedor full-stack",
+              sameAs: [
+                "https://github.com/kaueajure",
+                "https://www.linkedin.com/in/kaueajure/",
+              ],
+            },
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <Motion />
     </>
   );

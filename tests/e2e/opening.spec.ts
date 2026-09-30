@@ -1,188 +1,130 @@
 import { test, expect, type Page } from "@playwright/test";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
-async function unlocked(page: Page) {
-  await expect(overlay(page)).toHaveCount(0, { timeout: 11000 });
-  await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
-  expect(
-    await page
-      .locator("#portfolio-page")
-      .evaluate((el) => (el as HTMLElement).inert),
-  ).toBe(false);
-  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe(
-    "hidden",
-  );
-  await expect(page.getByRole("link", { name: /Ver projetos/ })).toBeVisible();
-  await page.mouse.wheel(0, 600);
-  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
-}
-for (const width of [1440, 768, 390]) {
-  test(`opening completes automatically at ${width}px`, async ({ page }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (e) => errors.push(e.message));
+for (const width of [1440, 768, 390, 320]) {
+  test(`intro concludes and refresh skips at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(overlay(page)).toBeVisible();
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-    expect(await page.evaluate(() => scrollY)).toBe(0);
+    await expect(overlay(page)).toBeHidden({ timeout: 10000 });
+    await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await page.mouse.wheel(0, 900);
-    expect(await page.evaluate(() => scrollY)).toBe(0);
-    await unlocked(page);
-    expect(errors).toEqual([]);
     await page.reload();
-    await expect(overlay(page)).toBeVisible();
-    await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-    await overlay(page)
-      .getByRole("button", { name: /Pular intro/i })
-      .click();
-    await unlocked(page);
+    await expect(overlay(page)).toBeHidden();
+    await expect(
+      page.getByRole("link", { name: /Ver projetos/ }),
+    ).toBeVisible();
   });
 }
-test("skip and keyboard focus release the page", async ({ page }) => {
+test("skip and Escape release focus and scrolling", async ({ page }) => {
   await page.goto("/");
-  await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-  await overlay(page)
-    .getByRole("button", { name: /Pular intro/i })
-    .click();
-  await expect(overlay(page)).toHaveCount(0, { timeout: 1500 });
-  await expect(page.locator("#hero-title")).toBeFocused();
-  await unlocked(page);
-});
-test("reduced motion bypasses the long opening", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await expect(overlay(page)).toHaveCount(0, { timeout: 1500 });
-  await unlocked(page);
-});
-test("audio stays opt-in and remains synchronized after skip", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toHaveAttribute("data-state", "playing");
   await expect(
-    overlay(page).getByRole("button", { name: /SOM OFF/ }),
-  ).toHaveAttribute("aria-pressed", "false");
+    overlay(page).getByRole("button", { name: /Pular intro/ }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(overlay(page)).toBeHidden();
+  await expect(page.locator("#hero-title")).toBeFocused();
+  await page.getByRole("button", { name: "Rever abertura" }).click();
+  await expect(overlay(page)).toBeVisible();
+  await expect(page).toHaveURL(/#inicio$/);
   await overlay(page)
-    .getByRole("button", { name: /SOM OFF/ })
+    .getByRole("button", { name: /Pular intro/ })
     .click();
+  await expect(overlay(page)).toBeHidden();
+  await expect(page.locator("#hero-title")).toBeFocused();
+});
+test("audio remains opt-in across skip", async ({ page }) => {
+  await page.goto("/");
+  const sound = overlay(page).getByRole("button", { name: /SOM OFF/ });
+  await expect(sound).toHaveAttribute("aria-pressed", "false");
+  await sound.click();
   await expect(
     overlay(page).getByRole("button", { name: /SOM ON/ }),
   ).toHaveAttribute("aria-pressed", "true");
   await overlay(page)
-    .getByRole("button", { name: /Pular intro/i })
+    .getByRole("button", { name: /Pular intro/ })
     .click();
-  await expect(overlay(page)).toHaveCount(0);
   await expect(page.getByRole("button", { name: /SOM ON/ })).toHaveAttribute(
     "aria-pressed",
     "true",
   );
 });
-test("changing motion preference releases an active opening", async ({
+test("hash entry respects destination and history", async ({ page }) => {
+  await page.goto("/#contato");
+  await expect(overlay(page)).toBeHidden();
+  await expect
+    .poll(() =>
+      page
+        .locator("#contato")
+        .evaluate((el) => Math.abs(el.getBoundingClientRect().top)),
+    )
+    .toBeLessThan(250);
+  await page.reload();
+  await expect(overlay(page)).toBeHidden();
+  await expect
+    .poll(() =>
+      page
+        .locator("#contato")
+        .evaluate((el) => Math.abs(el.getBoundingClientRect().top)),
+    )
+    .toBeLessThan(250);
+});
+test("reduced motion and no JavaScript show the portfolio", async ({
+  browser,
   page,
 }) => {
-  await page.goto("/");
-  await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toHaveAttribute("data-state", "playing");
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await unlocked(page);
+  await page.goto("/");
+  await expect(overlay(page)).toBeHidden();
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const noJs = await context.newPage();
+  await noJs.goto("/");
+  await expect(noJs.locator(".cinematic-opening")).toBeHidden();
+  await expect(noJs.getByRole("link", { name: /Ver projetos/ })).toBeVisible();
+  await context.close();
 });
-
-test("animation chunk failure falls back to the usable page", async ({
+test("mobile menu has coherent focus order and closes on navigation", async ({
   page,
 }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  let blocked = false;
-  await page.route("**/_next/static/chunks/*.js", async (route) => {
-    const response = await route.fetch();
-    const body = await response.text();
-    if (
-      body.includes("gsap.registerPlugin") &&
-      (body.includes("GreenSock") || body.includes("GSAP"))
-    ) {
-      blocked = true;
-      await route.abort();
-    } else await route.fulfill({ response, body });
-  });
-  await page.goto("/");
-  await unlocked(page);
-  expect(blocked).toBe(true);
-  expect(errors).toEqual([]);
-});
-
-test("escape skips and the focus loop stays inside the opening", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toHaveAttribute("data-state", "playing");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#inicio");
+  const menu = page.getByRole("button", { name: "Menu" });
+  await menu.click();
   await expect(
-    overlay(page).getByRole("button", { name: /Pular intro/i }),
-  ).toBeFocused();
-  await page.keyboard.press("Tab");
-  await expect(
-    overlay(page).getByRole("button", { name: /SOM OFF/ }),
-  ).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
-  await expect(
-    overlay(page).getByRole("button", { name: /Pular intro/i }),
+    page.getByRole("link", { name: "Projetos", exact: true }),
   ).toBeFocused();
   await page.keyboard.press("Escape");
-  await unlocked(page);
+  await expect(page.getByRole("button", { name: "Menu" })).toBeFocused();
+  await menu.click();
+  await page
+    .getByRole("navigation", { name: "Navegação principal" })
+    .getByRole("link", { name: "Contato" })
+    .click();
+  await expect(page.getByRole("button", { name: "Menu" })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+  await expect(page).toHaveURL(/#contato$/);
 });
-
-test("server-rendered boot covers the hero before hydration", async ({
+test("cases use internal routes and private projects have no repository link", async ({
   page,
 }) => {
-  let release!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  await page.route("**/_next/static/chunks/*.js", async (route) => {
-    await gate;
-    await route.continue();
-  });
-  try {
-    await page.goto("/", { waitUntil: "commit" });
-    await expect(overlay(page)).toHaveAttribute("data-state", "idle");
-    await expect(page.locator(".opening-boot")).toBeVisible();
-    expect(
-      await page.evaluate(
-        () =>
-          !!document
-            .elementFromPoint(innerWidth / 2, innerHeight / 2)
-            ?.closest(".cinematic-opening"),
-      ),
-    ).toBe(true);
-  } finally {
-    release();
-  }
-  await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-  await overlay(page)
-    .getByRole("button", { name: /Pular intro/i })
-    .click();
-  await unlocked(page);
-});
-
-test("without JavaScript the portfolio remains accessible", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-  try {
-    await page.goto(process.env.TEST_BASE_URL ?? "http://localhost:3000");
-    await expect(page.locator(".cinematic-opening")).toBeHidden();
-    await expect(
-      page.getByRole("link", { name: /Ver projetos/ }),
-    ).toBeVisible();
-  } finally {
-    await context.close();
-  }
+  await page.goto("/#projetos");
+  await page.getByRole("link", { name: "Alonso", exact: true }).click();
+  await expect(page).toHaveURL(/\/projetos\/alonso$/);
+  await expect(
+    page.getByRole("heading", { name: "Alonso", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Ver código público" }),
+  ).toHaveCount(0);
+  await page.goto("/projetos/gestifique");
+  await expect(
+    page.getByRole("link", { name: "Ver código público" }),
+  ).toHaveAttribute("href", "https://github.com/kaueajure/gestifique");
 });

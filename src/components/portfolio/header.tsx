@@ -1,32 +1,32 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SoundControl } from "./sound-control";
 import { audioEngine } from "@/lib/audio";
+import styles from "./portfolio.module.css";
+
 const links = [
-  ["sobre", "Sobre"],
   ["projetos", "Projetos"],
+  ["sobre", "Sobre"],
   ["stack", "Stack"],
-  ["github", "GitHub"],
+  ["codigo", "Código público"],
   ["contato", "Contato"],
-];
+] as const;
 export function Header() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("");
-  const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
+  const firstLink = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
-    // Browsers require a gesture even when the visitor previously enabled audio.
-    const restoreSound = () => {
-      try {
-        if (localStorage.getItem("kaue.sound.v1") === "on") {
-          void audioEngine.enable();
-        }
-      } catch {}
-    };
     const resume = (event: Event) => {
       if ((event.target as HTMLElement).closest?.(".sound")) return;
-      restoreSound();
+      try {
+        if (localStorage.getItem("kaue.sound.v1") === "on")
+          void audioEngine.enable();
+      } catch {}
       window.removeEventListener("pointerdown", resume);
       window.removeEventListener("keydown", resume);
     };
@@ -34,70 +34,84 @@ export function Header() {
     window.addEventListener("keydown", resume);
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
+        for (const entry of entries)
+          if (entry.isIntersecting) setActive(entry.target.id);
       },
-      { rootMargin: "-20% 0px -60% 0px" },
+      { rootMargin: "-20% 0px -65% 0px" },
     );
-    for (const [id] of links) {
-      const section = document.getElementById(id);
-      if (section) observer.observe(section);
-    }
-    const onScroll = () =>
-      header.current?.classList.toggle("scrolled", window.scrollY > 24);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    if (pathname === "/")
+      for (const [id] of links) {
+        const section = document.getElementById(id);
+        if (section) observer.observe(section);
+      }
     return () => {
       observer.disconnect();
       window.removeEventListener("pointerdown", resume);
       window.removeEventListener("keydown", resume);
-      window.removeEventListener("scroll", onScroll);
       audioEngine.cleanup();
     };
-  }, []);
+  }, [pathname]);
   useEffect(() => {
     if (!open) return;
-    const listener = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    firstLink.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
         setOpen(false);
         toggle.current?.focus();
       }
     };
-    window.addEventListener("keydown", listener);
-    return () => window.removeEventListener("keydown", listener);
+    const onResize = () => {
+      if (window.innerWidth > 700) setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+    };
   }, [open]);
   return (
-    <header ref={header} className="site-header">
-      <a className="brand" href="#inicio">
-        <Image src="/assets/logo-preta.png" width={40} height={40} alt="" />
-        <span>Kauê Ajure</span>
-      </a>
-      <nav
-        id="main-nav"
-        aria-label="Navegação principal"
-        className={open ? "open" : ""}
-      >
-        {links.map(([id, label]) => (
-          <a
-            href={`#${id}`}
-            aria-current={active === id ? "location" : undefined}
-            onClick={() => setOpen(false)}
-            key={id}
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-      <div className="header-controls">
-        <SoundControl />
+    <header className={styles.header}>
+      <div className={`${styles.container} ${styles.headerInner}`}>
+        <Link
+          className={styles.brand}
+          href={pathname === "/" ? "#inicio" : "/#inicio"}
+          aria-label="Kauê Ajure — início"
+        >
+          <Image src="/assets/logo-preta.png" width={36} height={36} alt="" />
+          <span aria-hidden="true">Kauê Ajure</span>
+        </Link>
         <button
           ref={toggle}
-          className="menu-toggle"
-          aria-controls="main-nav"
+          className={styles.menu}
           aria-expanded={open}
+          aria-controls="main-nav"
           onClick={() => setOpen(!open)}
         >
           {open ? "Fechar" : "Menu"}
         </button>
+        <nav
+          id="main-nav"
+          aria-label="Navegação principal"
+          className={`${styles.nav} ${open ? styles.navOpen : ""}`}
+        >
+          {links.map(([id, label], index) => (
+            <Link
+              ref={index === 0 ? firstLink : undefined}
+              href={`/#${id}`}
+              aria-current={
+                pathname === "/" && active === id ? "location" : undefined
+              }
+              onClick={() => setOpen(false)}
+              key={id}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+        <div className={styles.controls}>
+          <SoundControl />
+        </div>
       </div>
     </header>
   );

@@ -1,3 +1,4 @@
+import "@/components/admin/application.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tokenSchema } from "@/lib/domain/schemas";
