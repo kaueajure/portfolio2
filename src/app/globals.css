@@ -1481,7 +1481,7 @@ progress {
   position: relative;
   z-index: 101;
   background: var(--bg);
-  transform-origin: 50% 0;
+  transform-origin: 0 0;
 }
 html[data-opening-lock] .site-header {
   pointer-events: none;
@@ -1682,8 +1682,8 @@ html[data-opening-lock] .site-header {
   justify-content: center;
 }
 .module-hero > span {
-  font: 700 clamp(22px, 4.8vw, 76px)/1 var(--font-display);
-  letter-spacing: -0.07em;
+  font: 800 clamp(22px, 4.8vw, 76px)/1 var(--font-display);
+  letter-spacing: -0.08em;
   white-space: nowrap;
 }
 .module-hero em {

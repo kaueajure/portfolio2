@@ -76,7 +76,7 @@ export function OpeningScenes() {
         <div className="opening-module module-hero">
           <code>{'<section className="hero">'}</code>
           <span>
-            Kauê <em>Ajure.</em>
+            Kauê <em>Ajure</em>.
           </span>
           <p>Da interface ao banco e ao deploy.</p>
         </div>

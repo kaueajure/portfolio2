@@ -9,8 +9,16 @@ export function openingTimeline(
 ) {
   const q = gsap.utils.selector(root);
   const mobile = window.matchMedia("(max-width: 600px)").matches;
-  const viewportHeight = window.innerHeight;
-  const maskBottom = Math.max(0, page.scrollHeight - viewportHeight);
+  const layout = root.querySelector<HTMLElement>(".opening-layout")!;
+  const title = page.querySelector<HTMLElement>(".hero-name")!;
+  const previewTitle = root.querySelector<HTMLElement>(".module-hero > span")!;
+  const camera = { x: 0, y: 0, scale: 1, bottom: 0 };
+  const titleStart = { x: 0, y: 0, scale: 1 };
+  const textBounds = (element: HTMLElement) => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getBoundingClientRect();
+  };
   const packetTravel = root.querySelector(".opening-services")!.clientWidth - 8;
   const tl = gsap.timeline({
     defaults: { ease: "power3.inOut" },
@@ -136,24 +144,101 @@ export function openingTimeline(
       5.8,
     )
     .call(() => audioEngine.play("build"), [], 5.85)
-    .to(q(".opening-layout"), { scale: 1.3, duration: 0.85 }, 6.1)
-    .to(q(".opening-build"), { y: -50, opacity: 0, duration: 0.5 }, 6.35)
-    .to(q(".opening-layout"), { opacity: 0, duration: 0.12 }, 6.4)
-    .call(finishing, [], 6.4)
-    .call(() => audioEngine.play("reveal"), [], 6.4)
+    .call(
+      () => {
+        // Measure the settled preview and current font metrics at the handoff.
+        // Both scenes then follow the same camera instead of restarting the zoom.
+        const box = layout.getBoundingClientRect();
+        const source = textBounds(previewTitle);
+        const target = textBounds(title);
+        const titleBox = title.getBoundingClientRect();
+        camera.scale = box.width / page.clientWidth;
+        camera.x = box.left;
+        camera.y = box.top;
+        camera.bottom = Math.max(
+          0,
+          page.scrollHeight - box.height / camera.scale,
+        );
+        titleStart.scale = source.width / (target.width * camera.scale);
+        titleStart.x =
+          (source.left - camera.x) / camera.scale -
+          titleBox.left -
+          (target.left - titleBox.left) * titleStart.scale;
+        titleStart.y =
+          (source.top - camera.y) / camera.scale -
+          titleBox.top -
+          (target.top - titleBox.top) * titleStart.scale;
+        finishing();
+      },
+      [],
+      6.1,
+    )
+    .call(() => audioEngine.play("reveal"), [], 6.1)
+    .fromTo(
+      q(".opening-art"),
+      { x: 0, y: 0, scale: 1, transformOrigin: "0 0" },
+      {
+        x: () => -camera.x / camera.scale,
+        y: () => -camera.y / camera.scale,
+        scale: () => 1 / camera.scale,
+        duration: 1.65,
+        ease: "expo.inOut",
+        immediateRender: false,
+      },
+      6.1,
+    )
+    .to(
+      q(".opening-art"),
+      { opacity: 0, duration: 0.55, ease: "power1.inOut" },
+      6.1,
+    )
     .fromTo(
       page,
       {
-        clipPath: `inset(0px 0% ${maskBottom}px 0% round 24px)`,
-        transform: `translateY(${viewportHeight * 0.17}px) scale(${mobile ? 0.84 : 0.62})`,
+        clipPath: () => `inset(0px 0% ${camera.bottom}px 0% round 24px)`,
+        x: () => camera.x,
+        y: () => camera.y,
+        scale: () => camera.scale,
       },
       {
         clipPath: "inset(0px 0% 0px 0% round 0px)",
-        transform: "scale(1)",
-        duration: 1.35,
+        x: 0,
+        y: 0,
+        scale: 1,
+        duration: 1.65,
         ease: "expo.inOut",
+        immediateRender: false,
       },
-      6.4,
+      6.1,
+    )
+    .fromTo(
+      title,
+      {
+        x: () => titleStart.x,
+        y: () => titleStart.y,
+        scale: () => titleStart.scale,
+        transformOrigin: "0 0",
+      },
+      {
+        x: 0,
+        y: 0,
+        scale: 1,
+        duration: 1.65,
+        ease: "expo.inOut",
+        immediateRender: false,
+      },
+      6.1,
+    )
+    .fromTo(
+      page,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: 0.55,
+        ease: "power1.inOut",
+        immediateRender: false,
+      },
+      6.1,
     )
     .fromTo(
       page.querySelector(".site-header"),
