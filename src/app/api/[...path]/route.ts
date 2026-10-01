@@ -136,7 +136,7 @@ async function dispatch(
       }
       if (!get) {
         assert(
-          Number(req.headers.get("content-length") ?? 0) <= 21 * 1024 * 1024,
+          Number(req.headers.get("content-length") ?? 0) <= 4_400_000,
           "Arquivo muito grande",
           413,
         );
@@ -173,7 +173,7 @@ async function dispatch(
       const id = key ? idSchema.parse(key) : undefined;
       if (!get && action === "deactivate" && id) {
         await execute(
-          "UPDATE produtos_servicos SET ativo=0,atualizado_em=? WHERE id=?",
+          "UPDATE produtos_servicos SET ativo=false,atualizado_em=? WHERE id=?",
           [timestamp(), id],
         );
         return json({ ok: true });
@@ -217,7 +217,7 @@ async function dispatch(
         assert(Object.hasOwn(pdfTools, key), "Ferramenta inválida");
         await rateLimit(req, "pdf", 20, 600);
         assert(
-          Number(req.headers.get("content-length") ?? 0) <= 101 * 1024 * 1024,
+          Number(req.headers.get("content-length") ?? 0) <= 4_400_000,
           "Arquivo muito grande",
           413,
         );

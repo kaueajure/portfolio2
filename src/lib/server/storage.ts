@@ -1,15 +1,10 @@
 import "server-only";
-import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type";
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
 import { assert } from "./http";
+
 export interface Storage {
   put(key: string, data: Uint8Array, mime: string): Promise<void>;
   get(key: string): Promise<Uint8Array>;
@@ -22,85 +17,37 @@ function safeKey(key: string) {
   );
   return key;
 }
-// Private documents are mounted at runtime; never trace them into the build.
-const local: Storage = {
-  async put(key, data) {
-    await mkdir(process.env.STORAGE_PATH ?? "storage/private", {
-      recursive: true,
-      mode: 0o700,
-    });
-    await writeFile(
-      path.join(
-        /* turbopackIgnore: true */ process.env.STORAGE_PATH ??
-          "storage/private",
-        safeKey(key),
-      ),
-      data,
-      { mode: 0o600 },
-    );
-  },
-  async get(key) {
-    return readFile(
-      /* turbopackIgnore: true */
-      path.join(
-        /* turbopackIgnore: true */ process.env.STORAGE_PATH ??
-          "storage/private",
-        safeKey(key),
-      ),
-    );
-  },
-  async remove(key) {
-    await unlink(
-      path.join(
-        /* turbopackIgnore: true */ process.env.STORAGE_PATH ??
-          "storage/private",
-        safeKey(key),
-      ),
-    ).catch((e) => {
-      if (e.code !== "ENOENT") throw e;
-    });
-  },
-};
-let s3: S3Client | undefined;
-function s3Client() {
-  return (s3 ??= new S3Client({
-    region: process.env.S3_REGION ?? "auto",
-    endpoint: process.env.S3_ENDPOINT || undefined,
-    forcePathStyle: true,
+const bucket = "private-documents";
+let client: ReturnType<typeof createClient> | undefined;
+function supabase() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  assert(url && key, "Supabase Storage não configurado", 503);
+  return (client ??= createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
   }));
 }
-const remote: Storage = {
+export const storage = (): Storage => ({
   async put(key, data, mime) {
-    await s3Client().send(
-      new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET,
-        Key: safeKey(key),
-        Body: data,
-        ContentType: mime,
-      }),
-    );
+    const { error } = await supabase()
+      .storage.from(bucket)
+      .upload(safeKey(key), data, { contentType: mime, upsert: false });
+    if (error) throw error;
   },
   async get(key) {
-    const r = await s3Client().send(
-      new GetObjectCommand({
-        Bucket: process.env.S3_BUCKET,
-        Key: safeKey(key),
-      }),
-    );
-    assert(r.Body, "Arquivo indisponível", 404);
-    return r.Body.transformToByteArray();
+    const { data, error } = await supabase()
+      .storage.from(bucket)
+      .download(safeKey(key));
+    if (error || !data) throw error ?? new Error("Arquivo indisponível");
+    return new Uint8Array(await data.arrayBuffer());
   },
   async remove(key) {
-    await s3Client().send(
-      new DeleteObjectCommand({
-        Bucket: process.env.S3_BUCKET,
-        Key: safeKey(key),
-      }),
-    );
+    const { error } = await supabase()
+      .storage.from(bucket)
+      .remove([safeKey(key)]);
+    if (error) throw error;
   },
-};
-export const storage = () =>
-  process.env.STORAGE_DRIVER === "s3" ? remote : local;
+});
 const allowed: Record<string, string[]> = {
   pdf: ["application/pdf"],
   png: ["image/png"],
@@ -128,7 +75,7 @@ const allowed: Record<string, string[]> = {
   txt: ["text/plain"],
   csv: ["text/plain", "text/csv"],
 };
-export async function validateFile(file: File, max = 20 * 1024 * 1024) {
+export async function validateFile(file: File, max = 4 * 1024 * 1024) {
   assert(
     file.size > 0 && file.size <= max,
     `Arquivo deve ter até ${max / 1024 / 1024} MB.`,

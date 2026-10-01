@@ -461,7 +461,7 @@ function ClientForm({
               defaultValue={val("renewalDays", 365)}
               required
             />
-            <Field label="Documento (até 20 MB)" name="document" type="file" />
+            <Field label="Documento (até 4 MB)" name="document" type="file" />
             {client?.document ? (
               <label>
                 <input

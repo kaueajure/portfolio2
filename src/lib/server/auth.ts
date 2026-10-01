@@ -22,7 +22,7 @@ export async function currentUser() {
   const token = (await cookies()).get(cookieName)?.value;
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
   const r = await rows<{ id: number; name: string; email: string }>(
-    "SELECT u.id,u.nome AS name,u.email FROM app_sessions s JOIN usuarios u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>UTC_TIMESTAMP() AND u.senha_hash IS NOT NULL",
+    "SELECT u.id,u.nome AS name,u.email FROM app_sessions s JOIN usuarios u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AND u.senha_hash IS NOT NULL",
     [digest(token)],
   );
   return r[0] ?? null;
@@ -39,24 +39,23 @@ export async function rateLimit(
   seconds: number,
 ) {
   const ip =
-    process.env.TRUST_PROXY === "true"
-      ? (req.headers.get("x-real-ip") ?? "unknown")
-      : "local";
+    req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ??
+    "unknown";
   const key = digest(`${action}:${ip.slice(0, 100)}`);
   const allowed = await transaction(async (c) => {
     await execute(
-      "INSERT INTO app_rate_limits (bucket,attempts,expires_at) VALUES (?,0,DATE_ADD(UTC_TIMESTAMP(),INTERVAL ? SECOND)) ON DUPLICATE KEY UPDATE bucket=bucket",
+      "INSERT INTO app_rate_limits (bucket,attempts,expires_at) VALUES (?,0,(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + (? * INTERVAL '1 second')) ON CONFLICT (bucket) DO NOTHING",
       [key, seconds],
       c,
     );
-    const [r] = await rows<{ attempts: number; expired: number }>(
-      "SELECT attempts,expires_at<=UTC_TIMESTAMP() AS expired FROM app_rate_limits WHERE bucket=? FOR UPDATE",
+    const [r] = await rows<{ attempts: number; expired: boolean }>(
+      "SELECT attempts,expires_at<=(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') AS expired FROM app_rate_limits WHERE bucket=? FOR UPDATE",
       [key],
       c,
     );
     if (r.expired) {
       await execute(
-        "UPDATE app_rate_limits SET attempts=1,expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL ? SECOND) WHERE bucket=?",
+        "UPDATE app_rate_limits SET attempts=1,expires_at=(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + (? * INTERVAL '1 second') WHERE bucket=?",
         [seconds, key],
         c,
       );
@@ -132,7 +131,7 @@ export async function authenticate(
     await execute("DELETE FROM app_sessions WHERE token_hash=?", [digest(old)]);
   const token = randomBytes(32).toString("hex");
   await execute(
-    "INSERT INTO app_sessions(token_hash,user_id,expires_at) VALUES (?,?,DATE_ADD(UTC_TIMESTAMP(),INTERVAL 12 HOUR))",
+    "INSERT INTO app_sessions(token_hash,user_id,expires_at) VALUES (?,?,(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') + INTERVAL '12 hours')",
     [digest(token), user.id],
   );
   await execute(

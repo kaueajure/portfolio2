@@ -55,8 +55,8 @@ export async function deleteNote(id: number) {
   );
 }
 export async function listProducts() {
-  const r = await rows<Omit<Product, "active"> & { active: number }>(
-    "SELECT id,nome AS name,tipo_preco AS priceType,preco AS price,descricao AS description,ativo AS active,ordem AS `order` FROM produtos_servicos ORDER BY ordem,nome,id",
+  const r = await rows<Omit<Product, "active"> & { active: boolean }>(
+    'SELECT id,nome AS name,tipo_preco AS priceType,preco AS price,descricao AS description,ativo AS active,ordem AS "order" FROM produtos_servicos ORDER BY ordem,nome,id',
   );
   return r.map((p) => ({
     ...p,
@@ -72,7 +72,7 @@ export async function saveProduct(input: unknown, id?: number) {
     tipo_preco: v.priceType,
     preco: v.price,
     descricao: v.description,
-    ativo: v.active ? 1 : 0,
+    ativo: v.active,
     ordem: v.order,
     atualizado_em: timestamp(),
   };

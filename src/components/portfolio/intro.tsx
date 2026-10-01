@@ -11,15 +11,20 @@ export function Intro() {
             Projetos de produto e operação
           </span>
         </div>
-        <h1 tabIndex={-1} id="hero-title" className={styles.heroName}>
+        <h1
+          tabIndex={-1}
+          id="hero-title"
+          className={styles.heroName}
+          data-opening-title
+        >
           <span>Kauê</span> <span>Ajure</span>
           <span className={styles.period}>.</span>
         </h1>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
             <p>
-              Sistemas de gestão e produtos SaaS, da interface ao banco e ao
-              deploy.
+              Produtos digitais com interfaces pensadas para pessoas e
+              estrutura para funcionar de ponta a ponta.
             </p>
             <div className={styles.heroActions}>
               <a className={styles.primary} href="#projetos">
@@ -33,20 +38,20 @@ export function Intro() {
           <figure className={styles.heroVisual}>
             <div className={styles.heroScreen} data-opening-target>
               <Image
-                src="/projects/gestifique-kanban.png"
+                src="/projects/flixa-home.png"
                 width={1440}
-                height={1000}
-                alt="Interface do Gestifique mostrando chamados em colunas de status, com prioridades e responsáveis."
+                height={900}
+                alt="Página inicial do Flixa com filme em destaque, catálogo e navegação por gêneros."
                 priority
                 sizes="(max-width: 700px) calc(100vw - 40px), (max-width: 1000px) 60vw, 58vw"
               />
             </div>
             <figcaption>
               <span>
-                Gestifique · atendimento, prazos e responsáveis em uma mesma
-                operação.
+                Flixa · catálogo, biblioteca e descoberta em uma mesma
+                experiência.
               </span>
-              <Link href="/projetos/gestifique">Conhecer o case ↗</Link>
+              <Link href="/projetos/flixa">Conhecer o case ↗</Link>
             </figcaption>
           </figure>
         </div>

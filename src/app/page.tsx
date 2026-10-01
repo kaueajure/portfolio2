@@ -38,11 +38,6 @@ export function generateMetadata() {
 export default function Home() {
   return (
     <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `try{if(location.hash||localStorage.getItem('kaue.opening.seen')==='yes'||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.openingSkip='true'}catch(e){}`,
-        }}
-      />
       <noscript>
         <style>{`.cinematic-opening { display: none !important; }`}</style>
       </noscript>

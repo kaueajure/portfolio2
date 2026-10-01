@@ -312,17 +312,18 @@
 .mediaFrame {
   display: block;
   position: relative;
-  background: #dce5ed;
-  padding: clamp(18px, 3.5vw, 52px);
-  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #c2ced8;
+  border-radius: 8px;
   overflow: hidden;
+}
+.flixaFrame {
+  background: #1a1016;
 }
 .mediaFrame img {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 4px;
-  box-shadow: 0 12px 35px #142e4414;
 }
 .media figcaption {
   margin-top: 14px;
@@ -352,10 +353,6 @@
   border-top: 1px solid var(--rule);
   margin-bottom: 100px;
 }
-.asymmetric .mediaFrame {
-  background: #e5e6e2;
-  padding: 28px;
-}
 .compactGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -374,14 +371,6 @@
 }
 .compact .media {
   margin-bottom: 28px;
-}
-.compact .mediaFrame {
-  padding: 22px;
-}
-.compact .mediaFrame img {
-  aspect-ratio: 1.44;
-  object-fit: cover;
-  object-position: top;
 }
 .codePreview {
   background: #202a33;
@@ -915,15 +904,9 @@
     margin-bottom: 55px;
     padding-top: 40px;
   }
-  .asymmetric .mediaFrame {
-    padding: 16px;
-  }
   .compactGrid {
     grid-template-columns: 1fr;
     gap: 48px;
-  }
-  .compact .mediaFrame {
-    padding: 16px;
   }
   .codePreview {
     min-height: 230px;
@@ -1016,11 +999,6 @@
   .heroTop {
     font-size: 12px;
   }
-}
-.asymmetric .mediaFrame img {
-  aspect-ratio: 1.35;
-  object-fit: cover;
-  object-position: top;
 }
 .productPreview {
   display: block;
@@ -1159,13 +1137,7 @@
   margin-block: 48px 26px;
 }
 .caseHeroMedia .mediaFrame {
-  padding: 0;
-  border: 1px solid var(--rule);
-}
-.caseHeroMedia .mediaFrame img {
-  aspect-ratio: 1.75;
-  object-fit: cover;
-  object-position: top;
+  border-color: var(--rule);
 }
 .caseHeroMedia .productPreview {
   min-height: 400px;
@@ -1173,9 +1145,6 @@
 @media (max-width: 700px) {
   .caseHeroMedia {
     margin-block: 32px 20px;
-  }
-  .caseHeroMedia .mediaFrame img {
-    aspect-ratio: 1.3;
   }
   .caseHeroMedia .productPreview {
     min-height: 250px;

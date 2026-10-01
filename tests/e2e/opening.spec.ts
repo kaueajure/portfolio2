@@ -2,12 +2,12 @@ import { test, expect, type Page } from "@playwright/test";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
 for (const width of [1440, 768, 390, 320]) {
-  test(`intro concludes and refresh skips at ${width}px`, async ({ page }) => {
+  test(`intro concludes and replays on refresh at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(overlay(page)).toBeVisible();
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-    await expect(overlay(page)).toBeHidden({ timeout: 10000 });
+    await expect(overlay(page)).toBeHidden({ timeout: 12000 });
     await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
     expect(
       await page.evaluate(
@@ -15,7 +15,9 @@ for (const width of [1440, 768, 390, 320]) {
       ),
     ).toBe(true);
     await page.reload();
-    await expect(overlay(page)).toBeHidden();
+    await expect(overlay(page)).toBeVisible();
+    await expect(overlay(page)).toHaveAttribute("data-state", "playing");
+    await expect(overlay(page)).toBeHidden({ timeout: 12000 });
     await expect(
       page.getByRole("link", { name: /Ver projetos/ }),
     ).toBeVisible();
@@ -49,6 +51,7 @@ test("audio remains opt-in across skip", async ({ page }) => {
   await overlay(page)
     .getByRole("button", { name: /Pular intro/ })
     .click();
+  await expect(overlay(page)).toBeHidden();
   await expect(page.getByRole("button", { name: /SOM ON/ })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -56,7 +59,8 @@ test("audio remains opt-in across skip", async ({ page }) => {
 });
 test("hash entry respects destination and history", async ({ page }) => {
   await page.goto("/#contato");
-  await expect(overlay(page)).toBeHidden();
+  await expect(overlay(page)).toBeVisible();
+  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
   await expect
     .poll(() =>
       page
@@ -65,7 +69,8 @@ test("hash entry respects destination and history", async ({ page }) => {
     )
     .toBeLessThan(250);
   await page.reload();
-  await expect(overlay(page)).toBeHidden();
+  await expect(overlay(page)).toBeVisible();
+  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
   await expect
     .poll(() =>
       page
@@ -93,6 +98,7 @@ test("mobile menu has coherent focus order and closes on navigation", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/#inicio");
+  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
   const menu = page.getByRole("button", { name: "Menu" });
   await menu.click();
   await expect(
@@ -115,6 +121,7 @@ test("cases use internal routes and private projects have no repository link", a
   page,
 }) => {
   await page.goto("/#projetos");
+  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
   await page.getByRole("link", { name: "Alonso", exact: true }).click();
   await expect(page).toHaveURL(/\/projetos\/alonso$/);
   await expect(

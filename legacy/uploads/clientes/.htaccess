@@ -1,3 +1,0 @@
-# Negar qualquer acesso HTTP direto aos arquivos enviados.
-# Download somente via api/document.php (autenticado).
-Require all denied

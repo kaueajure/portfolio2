@@ -4,5 +4,5 @@ import { capabilities } from "@/lib/pdf/processor";
 export default async function Page() {
   await requirePageUser();
   const caps = await capabilities();
-  return <PdfTools capabilities={caps.tools} language={caps.ocrLanguage} />;
+  return <PdfTools capabilities={caps.tools} />;
 }

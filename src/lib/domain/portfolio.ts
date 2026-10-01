@@ -30,6 +30,81 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    slug: "flixa",
+    name: "Flixa",
+    category: "Produto de entretenimento",
+    statement: "Uma biblioteca que também conecta.",
+    description:
+      "Catálogo, biblioteca pessoal, perfis e recursos sociais reunidos em uma experiência de descoberta.",
+    audience: "Pessoas organizando sua experiência de entretenimento",
+    problem:
+      "Descobrir conteúdo, manter uma biblioteca e compartilhar recomendações são fluxos diferentes que precisam conviver na mesma aplicação.",
+    role: "Desenvolvimento full-stack",
+    scope:
+      "Catálogo, autenticação, perfis, biblioteca, recomendações e presença em tempo real.",
+    status: "Código público",
+    caseStudyHref: "/projetos/flixa",
+    repositoryHref: "https://github.com/kaueajure/flixa",
+    images: [
+      {
+        src: "/projects/flixa-home.png",
+        width: 1440,
+        height: 900,
+        alt: "Tela inicial do Flixa com filme em destaque, navegação do catálogo e lista de gêneros.",
+        caption: "Tela inicial do Flixa · captura do aplicativo em execução.",
+      },
+    ],
+    stack: [
+      "React",
+      "TypeScript",
+      "Next.js / Vinext",
+      "Drizzle",
+      "MySQL",
+      "Ably",
+    ],
+    decisions: [
+      {
+        title: "Biblioteca e descoberta com fluxos próprios",
+        description:
+          "O código separa as interfaces de biblioteca, amigos, esportes e retrospectiva, preservando responsabilidades de cada experiência.",
+        evidence: "https://github.com/kaueajure/flixa/tree/main/app",
+      },
+      {
+        title: "Presença além do estado da tela",
+        description:
+          "A aplicação possui rotas de autenticação e presença, além de integração com Ably para os recursos em tempo real.",
+        evidence: "https://github.com/kaueajure/flixa/tree/main/app/api",
+      },
+      {
+        title: "Validação de comportamentos",
+        description:
+          "Os testes versionados cobrem navegação, autenticação, presença, recomendações e eventos de reprodução.",
+        evidence: "https://github.com/kaueajure/flixa/tree/main/tests",
+      },
+    ],
+    architecture: [
+      {
+        name: "Experiência",
+        responsibility: "Catálogo, biblioteca e perfis em React.",
+      },
+      {
+        name: "Aplicação e dados",
+        responsibility:
+          "Rotas de API, Drizzle e MySQL para os recursos persistidos.",
+      },
+      {
+        name: "Presença",
+        responsibility:
+          "Integração em tempo real separada da renderização dos conteúdos.",
+      },
+    ],
+    validation:
+      "O projeto contém testes de navegação, contas, presença e recomendações. A existência dessas suítes não é uma afirmação sobre sua execução em produção.",
+    limitations:
+      "O catálogo depende de fontes externas. Este case não apresenta métricas de público nem resultados comerciais.",
+    evidenceLabel: "Navegação, presença e testes de interface",
+  },
+  {
     slug: "gestifique",
     name: "Gestifique",
     category: "SaaS de atendimento",
@@ -145,12 +220,12 @@ export const projects: Project[] = [
     caseStudyHref: "/projetos/alonso",
     images: [
       {
-        src: "/projects/alonso-admin.png",
+        src: "/projects/alonso-home.png",
         width: 1440,
-        height: 1659,
-        alt: "Tela real da administração Alonso para adicionar imóvel, com dados principais, detalhes e upload de mídia.",
+        height: 800,
+        alt: "Página inicial do Alonso com busca de imóveis, navegação por categorias e atalhos para o catálogo.",
         caption:
-          "Administração Alonso · cadastro de imóvel em versão local de revisão.",
+          "Página inicial do Alonso · captura do site em execução.",
       },
     ],
     stack: ["Next.js", "React", "TypeScript", "MySQL", "Zod", "Vitest"],
@@ -190,7 +265,7 @@ export const projects: Project[] = [
     validation:
       "O código local inclui testes de validação de imóveis, processamento de formulário, armazenamento de mídias e configuração da empresa.",
     limitations:
-      "O repositório não está disponível publicamente. A captura de revisão mostra o formulário de cadastro, sem dados de imóveis publicados.",
+      "O repositório não está disponível publicamente. A captura mostra a página inicial em uma versão local, sem dados de imóveis publicados.",
     evidenceLabel: "Catálogo, publicação e validação de mídias",
   },
   {
@@ -256,73 +331,7 @@ export const projects: Project[] = [
       "Este case apresenta o escopo e as decisões documentadas. Não publica dados municipais, métricas de adoção ou resultados operacionais.",
     evidenceLabel: "Modelo de acesso e testes de obrigações",
   },
-  {
-    slug: "flixa",
-    name: "Flixa",
-    category: "Produto de entretenimento",
-    statement: "Uma biblioteca que também conecta.",
-    description:
-      "Catálogo, biblioteca pessoal, perfis e recursos sociais reunidos em uma experiência de descoberta.",
-    audience: "Pessoas organizando sua experiência de entretenimento",
-    problem:
-      "Descobrir conteúdo, manter uma biblioteca e compartilhar recomendações são fluxos diferentes que precisam conviver na mesma aplicação.",
-    role: "Desenvolvimento full-stack",
-    scope:
-      "Catálogo, autenticação, perfis, biblioteca, recomendações e presença em tempo real.",
-    status: "Código público",
-    caseStudyHref: "/projetos/flixa",
-    repositoryHref: "https://github.com/kaueajure/flixa",
-    images: [],
-    stack: [
-      "React",
-      "TypeScript",
-      "Next.js / Vinext",
-      "Drizzle",
-      "MySQL",
-      "Ably",
-    ],
-    decisions: [
-      {
-        title: "Biblioteca e descoberta com fluxos próprios",
-        description:
-          "O código separa as interfaces de biblioteca, amigos, esportes e retrospectiva, preservando responsabilidades de cada experiência.",
-        evidence: "https://github.com/kaueajure/flixa/tree/main/app",
-      },
-      {
-        title: "Presença além do estado da tela",
-        description:
-          "A aplicação possui rotas de autenticação e presença, além de integração com Ably para os recursos em tempo real.",
-        evidence: "https://github.com/kaueajure/flixa/tree/main/app/api",
-      },
-      {
-        title: "Validação de comportamentos",
-        description:
-          "Os testes versionados cobrem navegação, autenticação, presença, recomendações e eventos de reprodução.",
-        evidence: "https://github.com/kaueajure/flixa/tree/main/tests",
-      },
-    ],
-    architecture: [
-      {
-        name: "Experiência",
-        responsibility: "Catálogo, biblioteca e perfis em React.",
-      },
-      {
-        name: "Aplicação e dados",
-        responsibility:
-          "Rotas de API, Drizzle e MySQL para os recursos persistidos.",
-      },
-      {
-        name: "Presença",
-        responsibility:
-          "Integração em tempo real separada da renderização dos conteúdos.",
-      },
-    ],
-    validation:
-      "O projeto contém testes de navegação, contas, presença e recomendações. A existência dessas suítes não é uma afirmação sobre sua execução em produção.",
-    limitations:
-      "O catálogo depende de fontes externas. Este case não apresenta métricas de público nem resultados comerciais.",
-    evidenceLabel: "Navegação, presença e testes de interface",
-  },
+
 ];
 
 export const stack = [

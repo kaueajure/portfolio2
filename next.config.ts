@@ -1,17 +1,13 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
-  output: "standalone",
   poweredByHeader: false,
-  outputFileTracingExcludes: {
-    "/*": [
-      "./legacy/**/*",
-      "./storage/**/*",
-      "./.env*",
-      "./tests/**/*",
-      "./test-results/**/*",
-    ],
+  outputFileTracingIncludes: {
+    "/*": ["./public/fonts/DejaVuSans.ttf"],
   },
-  serverExternalPackages: ["mysql2", "argon2", "sharp"],
+  outputFileTracingExcludes: {
+    "/*": ["./.env*", "./tests/**/*", "./test-results/**/*"],
+  },
+  serverExternalPackages: ["pg", "argon2", "sharp"],
   async headers() {
     return [
       {

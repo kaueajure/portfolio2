@@ -1,25 +1,21 @@
 import { readFile } from "node:fs/promises";
-import mysql from "mysql2/promise";
+import pg from "pg";
 import nextEnv from "@next/env";
 const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
-const c = await mysql.createConnection({
-  host: process.env.MYSQL_HOST,
-  port: Number(process.env.MYSQL_PORT ?? 3306),
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-  ssl:
-    process.env.MYSQL_SSL === "true" ? { rejectUnauthorized: true } : undefined,
-});
+const url = process.env.DATABASE_DIRECT_URL;
+if (!url) throw new Error("DATABASE_DIRECT_URL é necessária para migrations");
+const c = new pg.Client({ connectionString: url });
+await c.connect();
 try {
-  const file = process.argv.includes("--bootstrap")
-    ? "migrations/000_initial.sql"
-    : "migrations/001_runtime.sql";
-  const sql = await readFile(file, "utf8");
-  for (const statement of sql.split(";").filter((s) => s.trim()))
-    await c.query(statement);
-  console.log("Migration aditiva aplicada. Tabelas de negócio preservadas.");
+  await c.query("BEGIN");
+  for (const file of ["202609300001_initial.sql", "202609300002_pdf_jobs.sql"])
+    await c.query(await readFile(`supabase/migrations/${file}`, "utf8"));
+  await c.query("COMMIT");
+  console.log("Schema PostgreSQL aplicado.");
+} catch (error) {
+  await c.query("ROLLBACK");
+  throw error;
 } finally {
   await c.end();
 }

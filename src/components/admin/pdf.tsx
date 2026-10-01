@@ -5,24 +5,15 @@ import { api } from "@/lib/client";
 import { Field, Select } from "@/components/ui/fields";
 export function PdfTools({
   capabilities,
-  language,
 }: {
   capabilities: Record<PdfTool, boolean>;
-  language: string;
 }) {
   return (
     <>
       <h1>Ferramentas PDF</h1>
       <p>
-        Até 25 MB por arquivo, 100 MB por operação e 300 páginas. Resultados
-        disponíveis por uma hora.
-      </p>
-      <p>
-        OCR:{" "}
-        {language === "por+eng"
-          ? "português e inglês"
-          : "inglês (dados de português ausentes)"}
-        . PDF → Word preserva o texto extraído; a diagramação pode mudar.
+        Até 4 MB por operação e 300 páginas. Resultados disponíveis por uma
+        hora.
       </p>
       <div className="card-grid">
         {(Object.keys(pdfTools) as PdfTool[]).map((tool) => (
@@ -52,7 +43,8 @@ function Tool({ tool, available }: { tool: PdfTool; available: boolean }) {
       <h2>{pdfTools[tool]}</h2>
       {!available ? (
         <p>
-          Indisponível: a ferramenta necessária não está instalada no servidor.
+          Indisponível na Vercel: esta conversão exige um serviço externo de
+          processamento.
         </p>
       ) : null}
       <form

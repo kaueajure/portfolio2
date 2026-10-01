@@ -14,6 +14,7 @@ export function ProjectMedia({
 }) {
   const image = project.images[index];
   const previewClass = `${styles.productPreview} ${project.slug === "flixa" ? styles.flixaPreview : styles.portalPreview}`;
+  const mediaFrameClass = `${styles.mediaFrame} ${project.slug === "flixa" ? styles.flixaFrame : ""}`;
   const preview = (
     <>
       <div className={styles.previewTop}>
@@ -92,14 +93,14 @@ export function ProjectMedia({
     <figure className={styles.media}>
       {linked ? (
         <Link
-          className={styles.mediaFrame}
+          className={mediaFrameClass}
           href={project.caseStudyHref}
           aria-label={`Ver case ${project.name}`}
         >
           {picture}
         </Link>
       ) : (
-        <div className={styles.mediaFrame}>{picture}</div>
+        <div className={mediaFrameClass}>{picture}</div>
       )}
       <figcaption>{image.caption}</figcaption>
     </figure>

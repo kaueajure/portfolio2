@@ -119,7 +119,7 @@ export async function listProposals() {
 async function nextCode(c: Connection) {
   const year = Number(today().slice(0, 4));
   await execute(
-    "INSERT INTO app_proposal_sequences(year,number) VALUES (?,0) ON DUPLICATE KEY UPDATE number=number",
+    "INSERT INTO app_proposal_sequences(year,number) VALUES (?,0) ON CONFLICT (year) DO NOTHING",
     [year],
     c,
   );
@@ -129,7 +129,7 @@ async function nextCode(c: Connection) {
     c,
   );
   const [last] = await rows<{ n: number }>(
-    "SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(codigo,'-',-1) AS UNSIGNED)),0) AS n FROM propostas WHERE codigo LIKE ?",
+    "SELECT COALESCE(MAX(CAST(split_part(codigo,'-',3) AS INTEGER)),0) AS n FROM propostas WHERE codigo LIKE ?",
     [`PROP-${year}-%`],
     c,
   );
