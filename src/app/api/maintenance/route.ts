@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`)
     return new Response(null, { status: 401 });
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) return new Response(null, { status: 503 });
   const expired = await rows<{ id: string; object_key: string }>(
     "SELECT id,object_key FROM app_pdf_jobs WHERE expires_at < (CURRENT_TIMESTAMP AT TIME ZONE 'UTC') LIMIT 100",

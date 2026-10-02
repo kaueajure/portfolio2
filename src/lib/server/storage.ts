@@ -21,7 +21,7 @@ const bucket = "private-documents";
 let client: ReturnType<typeof createClient> | undefined;
 function supabase() {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY;
   assert(url && key, "Supabase Storage não configurado", 503);
   return (client ??= createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },

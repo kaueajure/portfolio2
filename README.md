@@ -5,7 +5,7 @@ Aplicação Next.js App Router para site público, administração de clientes, 
 ## Instalação
 
 1. Crie um projeto Supabase e copie as URLs de conexão em **Connect**. Use a conexão **Transaction pooler** (porta 6543) em `DATABASE_URL`. Para migrations, use a conexão direta ou **Session pooler** em `DATABASE_DIRECT_URL`.
-2. Copie `.env.example` para `.env.local` e preencha as variáveis. `SUPABASE_SERVICE_ROLE_KEY` e senhas do banco ficam somente no servidor. Gere `AUTH_SECRET`, `SETUP_TOKEN` e `CRON_SECRET` com pelo menos 32 caracteres aleatórios cada.
+2. Copie `.env.example` para `.env.local` e preencha as variáveis. `SUPABASE_SECRET_KEY` e senhas do banco ficam somente no servidor. Gere `AUTH_SECRET`, `SETUP_TOKEN` e `CRON_SECRET` com pelo menos 32 caracteres aleatórios cada.
 3. Execute:
 
 ```sh
@@ -20,7 +20,7 @@ A migration cria as tabelas e dois buckets privados. O usuário inicial `kaueaju
 
 1. Importe este repositório na Vercel com framework Next.js. Build: `npm run build`. Não há comando de inicialização específico.
 2. Aplique `npm run db:migrate` ao projeto Supabase antes do primeiro deploy de produção. Use a conexão direta ou Session pooler para isso.
-3. Configure no projeto Vercel `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_URL`, `AUTH_SECRET` e `CRON_SECRET`; configure `SETUP_TOKEN` somente até criar a senha. `GITHUB_TOKEN` é opcional. `DATABASE_DIRECT_URL` só é necessária onde as migrations forem executadas.
+3. Configure no projeto Vercel `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `APP_URL`, `AUTH_SECRET` e `CRON_SECRET`; configure `SETUP_TOKEN` somente até criar a senha. `GITHUB_TOKEN` é opcional. `DATABASE_DIRECT_URL` só é necessária onde as migrations forem executadas.
 4. Defina `APP_URL` como a origem HTTPS exata do domínio final e faça o deploy. Reimplante ao trocar domínio ou variáveis. O cron diário em `vercel.json` remove sessões, limites e resultados PDF expirados.
 5. Confira login, upload/download privado e aceite de proposta no domínio publicado.
 
