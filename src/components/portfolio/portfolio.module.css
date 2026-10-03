@@ -137,27 +137,21 @@
 .period {
   color: var(--link);
 }
-.heroGrid {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 24px;
-  align-items: start;
-}
 .heroCopy {
-  grid-column: 1 / 5;
+  max-width: 760px;
   padding-top: 10px;
 }
 .heroCopy > p {
   font-size: clamp(21px, 2vw, 27px);
   line-height: 1.42;
   margin: 0 0 32px;
-  max-width: 25ch;
+  max-width: 42ch;
 }
 .heroActions {
   display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
 }
 .primary {
   display: inline-flex;
@@ -192,36 +186,6 @@
 }
 .textLink:hover {
   text-decoration-color: currentColor;
-}
-.heroVisual {
-  grid-column: 6 / -1;
-  margin: 0;
-}
-.heroScreen {
-  position: relative;
-  border: 1px solid #c2ced8;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 20px 50px #182e4012;
-}
-.heroScreen img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.heroVisual figcaption {
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--secondary);
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-}
-.heroVisual figcaption a {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  white-space: nowrap;
 }
 .heroNote {
   display: flex;
@@ -733,15 +697,6 @@
   .container {
     width: calc(100% - 64px);
   }
-  .heroGrid {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
-  .heroCopy {
-    grid-column: 1 / 4;
-  }
-  .heroVisual {
-    grid-column: 4 / -1;
-  }
   .heroCopy > p {
     font-size: 21px;
   }
@@ -839,14 +794,6 @@
   .heroName > span:first-child {
     display: block;
   }
-  .heroGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 28px;
-  }
-  .heroCopy,
-  .heroVisual {
-    grid-column: 1 / -1;
-  }
   .heroCopy {
     padding: 0;
   }
@@ -856,12 +803,9 @@
     margin-bottom: 22px;
   }
   .heroActions {
+    flex-direction: column;
+    align-items: start;
     gap: 4px;
-  }
-  .heroVisual figcaption {
-    font-size: 12px;
-    flex-wrap: wrap;
-    gap: 6px;
   }
   .heroNote {
     margin-top: 30px;

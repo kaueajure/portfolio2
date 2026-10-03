@@ -1,22 +1,25 @@
 import { test, expect, type Page } from "@playwright/test";
+import { openingCode } from "../../src/components/portfolio/intro/code";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
 for (const width of [1440, 390]) {
-  test(`one real hero assembles and expands at ${width}px`, async ({
+  test(`typed lines unlock only their real elements at ${width}px`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(page.locator(".opening-layout, .opening-module")).toHaveCount(
       0,
     );
     await expect(page.locator("html")).toHaveAttribute("data-opening-lock");
-    const result = await page.evaluate(
-      () =>
+    const observation = page.evaluate(
+      (lines) =>
         new Promise<{
-          assembled: boolean;
+          violations: string[];
+          typedParts: string[];
+          revealedParts: string[];
           sameElements: boolean;
-          stablePreview: boolean;
+          separatePanels: boolean;
           cleanParts: boolean;
         }>((resolve) => {
           const site = document.getElementById("portfolio-page")!;
@@ -24,48 +27,96 @@ for (const width of [1440, 390]) {
           const parts = Array.from(
             site.querySelectorAll<HTMLElement>("[data-opening-part]"),
           );
-          let assembled = false;
+          const rows = Array.from(
+            document.querySelectorAll<HTMLElement>(".opening-code"),
+          );
+          const violations = new Set<string>();
+          const typedParts = new Set<string>();
+          const revealedParts = new Set<string>();
           let sameElements = true;
-          let stablePreview = true;
-          let firstBounds: number[] | undefined;
+          let separatePanels = true;
           const sample = () => {
             sameElements &&=
               title === document.getElementById("hero-title") &&
               parts.every((part) => part.isConnected && site.contains(part));
-            assembled ||= parts.some((part) => {
-              const opacity = Number(getComputedStyle(part).opacity);
-              return opacity > 0.01 && opacity < 1;
-            });
-            if (
-              site.hasAttribute("data-opening-reveal") &&
-              document.querySelector('.cinematic-opening[data-state="playing"]')
-            ) {
-              const box = site.getBoundingClientRect();
-              const bounds = [box.x, box.y, box.width, box.height];
-              firstBounds ??= bounds;
-              stablePreview &&= bounds.every(
-                (value, index) => Math.abs(value - firstBounds![index]) < 0.1,
-              );
+            if (site.hasAttribute("data-opening-prepared")) {
+              rows.forEach((row, index) => {
+                const text =
+                  row.querySelector(".opening-typed")!.textContent ?? "";
+                if (!lines[index].source.startsWith(text))
+                  violations.add("Invalid typed prefix");
+                if (
+                  row.dataset.codeState === "complete" &&
+                  text !== lines[index].source
+                )
+                  violations.add("Incomplete line marked complete");
+              });
+              parts.forEach((part) => {
+                const key = part.dataset.openingPart!;
+                const row = rows.find((row) => row.dataset.codePart === key)!;
+                const text =
+                  row.querySelector(".opening-typed")!.textContent ?? "";
+                if (row.dataset.codeState === "typing" && text.length > 0)
+                  typedParts.add(key);
+                if (Number(getComputedStyle(part).opacity) > 0.001) {
+                  revealedParts.add(key);
+                  if (row.dataset.codeState !== "complete")
+                    violations.add(`Early reveal: ${key}`);
+                }
+              });
+              if (
+                revealedParts.size > 0 &&
+                document.querySelector(
+                  '.cinematic-opening[data-state="playing"]',
+                )
+              ) {
+                const editor = document
+                  .querySelector(".opening-workspace")!
+                  .getBoundingClientRect();
+                const preview = site.getBoundingClientRect();
+                separatePanels &&=
+                  editor.right <= preview.left + 1 ||
+                  editor.bottom <= preview.top + 1;
+                for (const element of document.querySelectorAll(
+                  ".opening-backend, .opening-build, .opening-build strong",
+                )) {
+                  if (Number(getComputedStyle(element).opacity) <= 0.1)
+                    continue;
+                  const box = element.getBoundingClientRect();
+                  separatePanels &&=
+                    box.right <= preview.left + 1 ||
+                    box.bottom <= preview.top + 1;
+                }
+              }
             }
             if (document.documentElement.hasAttribute("data-opening-lock"))
               requestAnimationFrame(sample);
             else
               resolve({
-                assembled,
+                violations: [...violations],
+                typedParts: [...typedParts],
+                revealedParts: [...revealedParts],
                 sameElements,
-                stablePreview,
+                separatePanels,
                 cleanParts: parts.every((part) => !part.hasAttribute("style")),
               });
           };
           sample();
         }),
+      openingCode,
     );
-    expect(result).toEqual({
-      assembled: true,
-      sameElements: true,
-      stablePreview: true,
-      cleanParts: true,
-    });
+    await expect(
+      page.locator('.opening-code[data-code-part="copy"]'),
+    ).toHaveAttribute("data-code-state", "typing", { timeout: 15000 });
+    await page.screenshot({ path: testInfo.outputPath("typing.png") });
+    const result = await observation;
+    const keys = openingCode.flatMap((line) => (line.part ? [line.part] : []));
+    expect(result.violations).toEqual([]);
+    expect(result.typedParts.sort()).toEqual([...keys].sort());
+    expect(result.revealedParts.sort()).toEqual([...keys].sort());
+    expect(result.sameElements).toBe(true);
+    expect(result.separatePanels).toBe(true);
+    expect(result.cleanParts).toBe(true);
     await expect(page.locator("#hero-title")).not.toBeFocused();
   });
 }
@@ -85,6 +136,7 @@ for (const width of [1440, 768, 390, 320]) {
     await expect(page.locator("[data-opening-part]").last()).toHaveCSS(
       "opacity",
       "1",
+      { timeout: 20000 },
     );
     await expect(page.locator(".opening-workspace")).toHaveCSS("opacity", "0");
     const previewTitle = await preview.evaluate((element) => {
@@ -123,7 +175,7 @@ for (const width of [1440, 768, 390, 320]) {
           sample();
         }),
     );
-    await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+    await expect(overlay(page)).toBeHidden({ timeout: 20000 });
     handoff.after.forEach((value, index) =>
       expect(Math.abs(value - handoff.before[index])).toBeLessThan(1),
     );
@@ -147,7 +199,7 @@ for (const width of [1440, 768, 390, 320]) {
     await page.reload();
     await expect(overlay(page)).toBeVisible();
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
-    await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+    await expect(overlay(page)).toBeHidden({ timeout: 20000 });
     await expect(
       page.getByRole("link", { name: /Ver projetos/ }),
     ).toBeVisible();
@@ -199,7 +251,7 @@ test("audio remains opt-in across skip", async ({ page }) => {
 test("hash entry respects destination and history", async ({ page }) => {
   await page.goto("/#contato");
   await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+  await expect(overlay(page)).toBeHidden({ timeout: 20000 });
   await expect
     .poll(() =>
       page
@@ -209,7 +261,7 @@ test("hash entry respects destination and history", async ({ page }) => {
     .toBeLessThan(250);
   await page.reload();
   await expect(overlay(page)).toBeVisible();
-  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+  await expect(overlay(page)).toBeHidden({ timeout: 20000 });
   await expect
     .poll(() =>
       page
@@ -237,7 +289,7 @@ test("mobile menu has coherent focus order and closes on navigation", async ({
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/#inicio");
-  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+  await expect(overlay(page)).toBeHidden({ timeout: 20000 });
   const menu = page.getByRole("button", { name: "Menu" });
   await menu.click();
   await expect(
@@ -260,7 +312,7 @@ test("cases use internal routes and private projects have no repository link", a
   page,
 }) => {
   await page.goto("/#projetos");
-  await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+  await expect(overlay(page)).toBeHidden({ timeout: 20000 });
   await page.getByRole("link", { name: "Alonso", exact: true }).click();
   await expect(page).toHaveURL(/\/projetos\/alonso$/);
   await expect(

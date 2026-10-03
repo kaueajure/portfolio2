@@ -176,7 +176,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
             clearTimeout(timeout);
             timeout = setTimeout(
               complete,
-              timeline.totalDuration() * 1000 + 2000,
+              (timeline.totalDuration() / timeline.timeScale()) * 1000 + 2000,
             );
           });
           skipAction.current = () => {

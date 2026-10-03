@@ -4,10 +4,13 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 
 ## Comportamento
 
-- Timeline automática de 8,35 s no desktop/tablet e aproximadamente 5,88 s no mobile, após carregar GSAP e as fontes.
-- Boot, editor, montagem dos elementos reais do site, conexão dos serviços, build e expansão da mesma página até preencher a tela.
-- O site é medido e preparado atrás do fundo opaco no início da timeline. Cabeçalho, metadados, título, texto, imagem e nota são animados diretamente no HTML real. Não existem painéis preenchidos imitando outro layout; a área da prévia é apenas uma âncora invisível para medir a posição da página. O fundo desaparece gradualmente durante a montagem, sem recalcular o layout nessa passagem.
-- Uma única transição encerra o editor antes de revelar o site; nenhum tween posterior volta a deixá-lo visível sobre a página.
+- Timeline automática de aproximadamente 13,74 s no desktop/tablet e 11,45 s no mobile, após carregar GSAP e as fontes.
+- Boot, digitação da estrutura e do JSX, montagem dos elementos reais do site, conexão dos serviços, build e expansão da mesma página até preencher a tela.
+- Editor e prévia real aparecem lado a lado no desktop e empilhados no mobile. O editor permanece visível durante toda a digitação, com cursor, indicação da linha ativa, confirmação e contador dos elementos liberados.
+- As linhas da interface são digitadas caractere por caractere. Ao concluir uma linha com alvo, a timeline revela apenas seu elemento real: cabeçalho, apresentação, título, descrição, botão de projetos, contato ou nota. Imports e estrutura JSX preparam o código sem liberar conteúdo antecipadamente.
+- `intro/code.ts` relaciona cada linha a um identificador estável de `data-opening-part`. O texto exibido é uma demonstração visual em JSX; nenhum código é avaliado ou compilado no navegador. A prévia usa os elementos do site renderizados no servidor.
+- A rolagem acompanha a linha ativa dentro do editor e não move a página. O editor sai uma única vez, após a última linha, antes do build e da expansão do site.
+- Os indicadores de serviços e build ocupam o espaço liberado pelo editor, preservando a prévia sem elementos por cima.
 - O conteúdo é renderizado no servidor. Durante a prévia, sua área animada fica limitada à altura da tela; o restante da página não aumenta a superfície transformada.
 - Ao concluir, o overlay é ocultado antes de restaurar estilos e rolagem. A largura reservada à barra de rolagem permanece estável. A página não ganha pin, spacer ou percurso adicional de scroll.
 - As animações de rolagem são inicializadas depois da abertura, com dois frames para permitir a pintura da página final. Replays interrompem essas animações e as reinicializam após a abertura.
@@ -22,7 +25,8 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 
 - `intro.tsx`: hero real do portfólio.
 - `intro/cinematic-intro.tsx`: ciclo de vida, foco, bloqueio e eventos de início/conclusão.
-- `intro/scenes.tsx`: cenas decorativas, com aria-hidden.
+- `intro/scenes.tsx`: editor, cursor e cenas decorativas, com aria-hidden.
+- `intro/code.ts`: sequência de código e correspondência com os elementos reais.
 - `intro/timeline.ts`: direção temporal e transformação da página real.
 - `motion.tsx`: animações de rolagem, medidas após a conclusão.
 - `sound-control.tsx` e `audio.ts`: áudio compartilhado com o header, ativado somente pelo usuário.
@@ -33,6 +37,6 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 
 Os testes também comparam a geometria do título na prévia com a página final, verificam continuidade inferior a 1 px no frame de liberação, limitam a prévia à altura da tela e confirmam que nenhum estilo temporário, inert ou foco no título permanece. Capturas da prévia e da página final são produzidas nos testes de desktop e mobile.
 
-Testes adicionais em desktop e mobile verificam que os painéis fictícios não existem, que a montagem usa os mesmos elementos da página final, que a prévia mantém posição e tamanho durante a montagem e que os estilos temporários de seus componentes são removidos, inclusive ao pular a abertura.
+Testes adicionais em desktop e mobile verificam a digitação parcial, o texto completo de cada linha, a liberação de cada elemento somente após completar sua linha, a separação entre editor e prévia e a preservação dos mesmos elementos até a página final. Também verificam a remoção dos estilos temporários, inclusive ao pular a abertura durante a digitação.
 
 Execute com o servidor local iniciado: `TEST_BASE_URL=http://localhost:3100 npx playwright test tests/e2e/opening.spec.ts`.

@@ -1,3 +1,5 @@
+import { openingCode } from "./code";
+
 export function OpeningScenes() {
   return (
     <div className="opening-art" aria-hidden="true">
@@ -13,56 +15,32 @@ export function OpeningScenes() {
         <small>initializing workspace…</small>
       </div>
       <div className="opening-workspace">
-        <aside className="opening-files">
-          <small>EXPLORER / main</small>
-          {[
-            "src/",
-            "  app/",
-            "    page.tsx",
-            "  components/",
-            "    Portfolio.tsx",
-            "  lib/",
-            "  services/",
-            "  db/",
-          ].map((f) => (
-            <div className="opening-file" key={f}>
-              {f}
-            </div>
-          ))}
-        </aside>
         <div className="opening-editor">
           <div className="opening-tab">
-            app / page.tsx <span>TSX</span>
+            app / page.tsx <span>TSX · LIVE PREVIEW</span>
           </div>
-          <pre>
-            {[
-              <>
-                <b>export default async function</b> Page() {"{"}
-              </>,
-              <>
-                {" "}
-                <b>const</b> projects = <b>await</b> getProjects();
-              </>,
-              <>
-                {" "}
-                <b>return</b> (
-              </>,
-              <>
-                {" "}
-                {"<"}
-                <em>Portfolio</em> projects={"{projects}"} /{">"}
-              </>,
-              <> );</>,
-              <>{"}"}</>,
-            ].map((line, i) => (
-              <span className="opening-code" key={i}>
+          <pre className="opening-code-scroll">
+            {openingCode.map(({ part }, i) => (
+              <span
+                className="opening-code"
+                data-code-part={part}
+                data-code-state="waiting"
+                key={i}
+              >
                 <small>{i + 1}</small>
-                {line}
+                <code>
+                  <span className="opening-typed" />
+                  <i className="opening-caret" />
+                </code>
+                <span className="opening-line-check">✓</span>
               </span>
             ))}
           </pre>
-          <div className="opening-autocomplete">
-            ↳ Portfolio · React component
+          <div className="opening-editor-status">
+            <span className="opening-code-status">Preparando a tela…</span>
+            <span className="opening-code-progress">
+              0 / {openingCode.filter((line) => line.part).length}
+            </span>
           </div>
         </div>
       </div>

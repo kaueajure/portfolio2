@@ -1,5 +1,6 @@
 import type { gsap as Gsap } from "gsap";
 import { audioEngine } from "@/lib/audio";
+import { openingCode } from "./code";
 export function openingTimeline(
   gsap: typeof Gsap,
   root: HTMLElement,
@@ -20,11 +21,18 @@ export function openingTimeline(
   const height = window.innerHeight;
   const scale = Math.min(box.width / width, box.height / height);
   const packetTravel = root.querySelector(".opening-services")!.clientWidth - 8;
-  const assemblyStart = 2.5;
-  const partDuration = 0.85;
-  const partStagger = 0.09;
-  const assemblyEnd =
-    assemblyStart + partDuration + (parts.length - 1) * partStagger;
+  const typingStart = 1.4;
+  const typingSteps = openingCode.map((line) => ({
+    ...line,
+    duration: Math.max(0.14, Math.min(1.25, line.source.length * 0.012)),
+  }));
+  const typingEnd =
+    typingStart +
+    typingSteps.reduce((total, line) => total + line.duration + 0.14, 0);
+  const rows = gsap.utils.toArray<HTMLElement>(q(".opening-code"));
+  const scroller = root.querySelector<HTMLElement>(".opening-code-scroll")!;
+  const status = root.querySelector<HTMLElement>(".opening-code-status")!;
+  const progress = root.querySelector<HTMLElement>(".opening-code-progress")!;
   // Prepare the bounded page while the opaque opening still covers it.
   page.style.setProperty("--opening-width", `${width}px`);
   page.style.setProperty("--opening-height", `${height}px`);
@@ -41,8 +49,9 @@ export function openingTimeline(
     defaults: { ease: "power3.inOut" },
     onComplete: complete,
   });
-  tl.addLabel("preview", assemblyStart);
-  tl.addLabel("backend", assemblyEnd + 0.6);
+  tl.addLabel("preview", 1.15);
+  tl.addLabel("typed", typingEnd);
+  tl.addLabel("backend", "typed+=0.5");
   tl.from(q(".opening-boot"), { y: 16, opacity: 0, duration: 0.4 }, 0)
     .from(
       q(".opening-boot small"),
@@ -65,41 +74,67 @@ export function openingTimeline(
         duration: 0.65,
       },
       0.65,
-    )
-    .from(
-      q(".opening-file"),
-      { x: -18, opacity: 0, stagger: 0.065, duration: 0.22 },
-      0.85,
-    )
-    .from(
-      q(".opening-code"),
-      { clipPath: "inset(0 100% 0 0)", x: 12, stagger: 0.12, duration: 0.3 },
-      1.35,
-    )
-    .from(
-      q(".opening-autocomplete"),
-      { y: 10, opacity: 0, duration: 0.25 },
-      1.95,
-    )
-    .call(() => audioEngine.play("code"), [], 1.4);
-  // Assemble the live hero once, then expand that same page to the viewport.
-  parts.forEach((part, i) => {
-    tl.fromTo(
-      part,
-      { y: 24, scale: 0.96, opacity: 0, transformOrigin: "50% 50%" },
-      {
-        y: 0,
-        scale: 1,
-        opacity: 1,
-        duration: partDuration,
-        ease: "power3.out",
-        immediateRender: true,
-      },
-      assemblyStart + i * partStagger,
     );
+  gsap.set(parts, {
+    y: 18,
+    scale: 0.98,
+    opacity: 0,
+    transformOrigin: "50% 50%",
   });
-  tl.call(() => audioEngine.play("snap"), [], 2.8)
-    .call(preview, [], "preview")
+  let position = typingStart;
+  let unlocked = 0;
+  typingSteps.forEach((line, index) => {
+    const row = rows[index];
+    const typed = row.querySelector<HTMLElement>(".opening-typed")!;
+    const characters = { count: 0 };
+    const target = line.part
+      ? parts.find((part) => part.dataset.openingPart === line.part)
+      : undefined;
+    tl.to(
+      characters,
+      {
+        count: line.source.length,
+        duration: line.duration,
+        ease: "none",
+        onStart: () => {
+          // Scroll only the editor, preserving the locked page and preview camera.
+          scroller.scrollTop = Math.max(
+            0,
+            row.offsetTop - scroller.clientHeight * 0.55,
+          );
+          row.dataset.codeState = "typing";
+          status.textContent = line.label
+            ? `Digitando: ${line.label.toLowerCase()}…`
+            : "Digitando a estrutura…";
+        },
+        onUpdate: () => {
+          typed.textContent = line.source.slice(
+            0,
+            Math.floor(characters.count),
+          );
+        },
+        onComplete: () => {
+          typed.textContent = line.source;
+          row.dataset.codeState = "complete";
+          if (target) {
+            unlocked += 1;
+            progress.textContent = `${unlocked} / ${parts.length}`;
+            status.textContent = `✓ ${line.label} na prévia`;
+            audioEngine.play("code");
+          }
+        },
+      },
+      position,
+    );
+    if (target)
+      tl.to(
+        target,
+        { y: 0, scale: 1, opacity: 1, duration: 0.35, ease: "power2.out" },
+        position + line.duration,
+      );
+    position += line.duration + 0.14;
+  });
+  tl.call(preview, [], "preview")
     .to(
       q(".opening-backdrop"),
       { opacity: 0, duration: 0.45, ease: "none" },
@@ -110,18 +145,17 @@ export function openingTimeline(
       { opacity: 0, duration: 0.45, ease: "none" },
       "preview",
     )
+    .call(
+      () => {
+        status.textContent = "✓ Tela inicial concluída";
+      },
+      [],
+      "typed",
+    )
     .to(
       q(".opening-workspace"),
-      {
-        xPercent: mobile ? 0 : -18,
-        yPercent: mobile ? -25 : -8,
-        rotationY: mobile ? 0 : -18,
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.25,
-        ease: "power2.inOut",
-      },
-      "preview-=0.25",
+      { opacity: 0, y: -12, duration: 0.4 },
+      "typed+=0.1",
     )
     .from(
       q(".opening-backend"),
@@ -182,6 +216,6 @@ export function openingTimeline(
     )
     .to(q(".opening-controls"), { opacity: 0, duration: 0.35 }, "backend+=3.3");
   gsap.set(q(".opening-art"), { visibility: "visible" });
-  if (mobile) tl.timeScale(1.42);
+  if (mobile) tl.timeScale(1.2);
   return tl;
 }

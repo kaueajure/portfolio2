@@ -71,7 +71,7 @@ export function Header() {
     };
   }, [open]);
   return (
-    <header className={styles.header} data-opening-part>
+    <header className={styles.header} data-opening-part="header">
       <div className={`${styles.container} ${styles.headerInner}`}>
         <Link
           className={styles.brand}
