@@ -3,7 +3,12 @@ import Link from "next/link";
 import styles from "./portfolio.module.css";
 export function Intro() {
   return (
-    <section id="inicio" className={styles.hero} aria-labelledby="hero-title">
+    <section
+      id="inicio"
+      tabIndex={-1}
+      className={styles.hero}
+      aria-labelledby="hero-title"
+    >
       <div className={styles.container}>
         <div className={styles.heroTop}>
           <span>Desenvolvedor full-stack</span>
@@ -11,20 +16,15 @@ export function Intro() {
             Projetos de produto e operação
           </span>
         </div>
-        <h1
-          tabIndex={-1}
-          id="hero-title"
-          className={styles.heroName}
-          data-opening-title
-        >
+        <h1 id="hero-title" className={styles.heroName}>
           <span>Kauê</span> <span>Ajure</span>
           <span className={styles.period}>.</span>
         </h1>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
             <p>
-              Produtos digitais com interfaces pensadas para pessoas e
-              estrutura para funcionar de ponta a ponta.
+              Produtos digitais com interfaces pensadas para pessoas e estrutura
+              para funcionar de ponta a ponta.
             </p>
             <div className={styles.heroActions}>
               <a className={styles.primary} href="#projetos">
@@ -36,7 +36,7 @@ export function Intro() {
             </div>
           </div>
           <figure className={styles.heroVisual}>
-            <div className={styles.heroScreen} data-opening-target>
+            <div className={styles.heroScreen}>
               <Image
                 src="/projects/flixa-home.png"
                 width={1440}

@@ -2,12 +2,63 @@ import { test, expect, type Page } from "@playwright/test";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
 for (const width of [1440, 768, 390, 320]) {
-  test(`intro concludes and replays on refresh at ${width}px`, async ({ page }) => {
+  test(`intro concludes and replays on refresh at ${width}px`, async ({
+    page,
+  }, testInfo) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await expect(overlay(page)).toBeVisible();
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
+    const preview = page.locator("#portfolio-page[data-opening-reveal]");
+    await expect(preview).toHaveCSS("opacity", "1");
+    const previewTitle = await preview.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const title = element
+        .querySelector("#hero-title")!
+        .getBoundingClientRect();
+      const scale = box.width / element.clientWidth;
+      return {
+        x: (title.x - box.x) / scale,
+        y: (title.y - box.y) / scale,
+        width: title.width / scale,
+        height: title.height / scale,
+        pageHeight: element.clientHeight,
+        viewportHeight: innerHeight,
+      };
+    });
+    expect(previewTitle.pageHeight).toBe(previewTitle.viewportHeight);
+    await expect(page.locator("#hero-title")).toHaveCount(1);
+    if (width === 1440 || width === 390)
+      await page.screenshot({ path: testInfo.outputPath("preview.png") });
+    const handoff = await page.evaluate(
+      () =>
+        new Promise<{ before: number[]; after: number[] }>((resolve) => {
+          let before: number[] = [];
+          const sample = () => {
+            const box = document
+              .getElementById("hero-title")!
+              .getBoundingClientRect();
+            const bounds = [box.x, box.y, box.width, box.height];
+            if (document.documentElement.hasAttribute("data-opening-lock")) {
+              before = bounds;
+              requestAnimationFrame(sample);
+            } else resolve({ before, after: bounds });
+          };
+          sample();
+        }),
+    );
     await expect(overlay(page)).toBeHidden({ timeout: 12000 });
+    handoff.after.forEach((value, index) =>
+      expect(Math.abs(value - handoff.before[index])).toBeLessThan(1),
+    );
+    const title = await page.locator("#hero-title").boundingBox();
+    for (const key of ["x", "y", "width", "height"] as const)
+      expect(Math.abs(title![key] - previewTitle[key])).toBeLessThan(1);
+    await expect(page.locator("#hero-title")).not.toBeFocused();
+    await expect(page.locator("#portfolio-page")).not.toHaveAttribute("style");
+    await expect(page.locator("#portfolio-page")).not.toHaveAttribute("inert");
+    if (width === 1440 || width === 390)
+      await page.screenshot({ path: testInfo.outputPath("final.png") });
     await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
     expect(
       await page.evaluate(
@@ -30,15 +81,22 @@ test("skip and Escape release focus and scrolling", async ({ page }) => {
   ).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(overlay(page)).toBeHidden();
-  await expect(page.locator("#hero-title")).toBeFocused();
+  await expect(page.locator("#inicio")).toBeFocused();
+  await expect(page.locator("#inicio")).toHaveCSS("outline-style", "none");
   await page.getByRole("button", { name: "Rever abertura" }).click();
   await expect(overlay(page)).toBeVisible();
   await expect(page).toHaveURL(/#inicio$/);
+  await expect(page.locator("#portfolio-page[data-opening-reveal]")).toHaveCSS(
+    "opacity",
+    "1",
+  );
   await overlay(page)
     .getByRole("button", { name: /Pular intro/ })
     .click();
   await expect(overlay(page)).toBeHidden();
-  await expect(page.locator("#hero-title")).toBeFocused();
+  await expect(page.locator("#hero-title")).not.toBeFocused();
+  await expect(page.locator("#portfolio-page")).not.toHaveAttribute("style");
+  await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
 });
 test("audio remains opt-in across skip", async ({ page }) => {
   await page.goto("/");

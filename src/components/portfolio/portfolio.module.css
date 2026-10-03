@@ -99,6 +99,9 @@
 .menu {
   display: none;
 }
+.site .hero:focus {
+  outline: none;
+}
 .hero {
   padding-top: 52px;
   padding-bottom: 100px;

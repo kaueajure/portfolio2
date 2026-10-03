@@ -32,7 +32,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       finished = false;
     let context: gsap.Context | undefined;
     let timeline: gsap.core.Timeline | undefined;
-    let exitTween: gsap.core.Tween | undefined;
+    let exitTween: gsap.core.Timeline | undefined;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)");
     const previousFocus =
@@ -44,9 +44,9 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       htmlOverflow: document.documentElement.style.overflow,
       behavior: document.documentElement.style.scrollBehavior,
       inert: page.inert,
-      clip: page.style.clipPath,
-      transform: page.style.transform,
+      pageStyle: page.getAttribute("style"),
     };
+    let keyboardInteraction = previousFocus?.matches(":focus-visible") ?? false;
     let locked = false;
     let focusFrame = 0;
     const unlock = () => {
@@ -56,32 +56,36 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       document.documentElement.style.overflow = saved.htmlOverflow;
       document.documentElement.style.scrollBehavior = saved.behavior;
       page.inert = saved.inert;
-      page.style.clipPath = saved.clip;
-      page.style.transform = saved.transform;
+      if (saved.pageStyle === null) page.removeAttribute("style");
+      else page.setAttribute("style", saved.pageStyle);
       page.removeAttribute("data-opening-reveal");
       document.documentElement.removeAttribute("data-opening-lock");
     };
     const complete = () => {
       if (finished) return;
       finished = true;
+      const focusWasInOverlay = overlay.contains(document.activeElement);
+      // Hide the outgoing scene before releasing its styles and the scroll lock.
+      overlay.hidden = true;
       clearTimeout(timeout);
       cancelAnimationFrame(focusFrame);
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
       reduced.removeEventListener("change", onReduced);
       timeline?.kill();
       exitTween?.kill();
-      context?.revert();
+      context?.kill(false);
       unlock();
       if (!disposed) {
         setState("complete");
-        if (overlay.contains(document.activeElement)) {
+        window.dispatchEvent(new Event("kaue:opening-complete"));
+        if (focusWasInOverlay && keyboardInteraction) {
           const target =
-            !replay &&
             previousFocus &&
             previousFocus !== document.body &&
             previousFocus.isConnected
               ? previousFocus
-              : document.getElementById("hero-title");
+              : document.getElementById("inicio");
           target?.focus({ preventScroll: true });
         }
         if (location.hash && location.hash !== "#inicio")
@@ -95,7 +99,12 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
     const onReduced = () => {
       if (reduced.matches) complete();
     };
+    const onPointer = () => {
+      keyboardInteraction = false;
+    };
     const onKey = (event: KeyboardEvent) => {
+      if (["Tab", "Escape", "Enter", " "].includes(event.key))
+        keyboardInteraction = true;
       if (event.key === "Escape") {
         event.preventDefault();
         skipAction.current();
@@ -117,11 +126,12 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
     };
     const frame = requestAnimationFrame(() => {
       if (reduced.matches) {
-        setState("complete");
+        complete();
         return;
       }
       setState("playing");
       locked = true;
+      window.dispatchEvent(new Event("kaue:opening-start"));
       page.inert = true;
       document.documentElement.style.scrollBehavior = "auto";
       window.scrollTo(0, 0);
@@ -132,12 +142,13 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
         skip.current?.focus({ preventScroll: true }),
       );
       document.addEventListener("keydown", onKey);
+      document.addEventListener("pointerdown", onPointer);
       reduced.addEventListener("change", onReduced);
       // Independent watchdog also releases the page if module loading stalls.
       timeout = setTimeout(complete, 10000);
       skipAction.current = complete;
-      void import("gsap")
-        .then(({ gsap }) => {
+      void Promise.all([import("gsap"), document.fonts.ready])
+        .then(([{ gsap }]) => {
           if (disposed || finished) return;
           context = gsap.context(() => {}, overlay);
           context.add(() => {
@@ -146,9 +157,10 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
               overlay,
               page,
               () => {
-                setState("finishing");
+                overlay.setAttribute("data-page-preview", "");
                 page.setAttribute("data-opening-reveal", "");
               },
+              () => setState("finishing"),
               complete,
             );
           });
@@ -156,18 +168,26 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
             if (finished) return;
             setState("skipping");
             timeline?.kill();
-            context?.revert();
-            page.setAttribute("data-opening-reveal", "");
-            exitTween = gsap.fromTo(
-              page,
-              { clipPath: "inset(0px 4% round 16px)" },
-              {
-                clipPath: "inset(0% 0% round 0px)",
-                duration: 0.3,
-                ease: "power2.out",
-                onComplete: complete,
-              },
-            );
+            exitTween = gsap.timeline({ onComplete: complete });
+            exitTween.to(overlay, {
+              opacity: 0,
+              duration: 0.3,
+              ease: "power2.out",
+            });
+            if (page.hasAttribute("data-opening-reveal"))
+              exitTween.to(
+                page,
+                {
+                  x: 0,
+                  y: 0,
+                  scale: 1,
+                  borderRadius: 0,
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: "power2.out",
+                },
+                0,
+              );
           };
         })
         .catch(complete);
@@ -178,10 +198,12 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       cancelAnimationFrame(focusFrame);
       clearTimeout(timeout);
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointer);
       reduced.removeEventListener("change", onReduced);
       timeline?.kill();
-      exitTween?.revert();
-      context?.revert();
+      exitTween?.kill();
+      context?.kill(false);
+      overlay.removeAttribute("data-page-preview");
       unlock();
     };
   }, [replay]);

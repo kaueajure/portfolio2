@@ -1,26 +1,34 @@
 # Abertura cinematográfica
 
-Esta correção substitui somente a abertura por scroll prevista originalmente em `Implementação.md`. O restante do portfólio mantém suas animações de scroll e os módulos administrativos permanecem inalterados.
+A abertura monta visualmente uma interface e revela a página real do portfólio. Não há uma segunda versão do hero: a prévia usa o mesmo HTML, fontes, imagens e layout da página final.
 
 ## Comportamento
 
-- Timeline automática de 7,75 s no desktop/tablet e aproximadamente 5,46 s no mobile.
-- Boot, criação da árvore, revelação de código, expansão de retângulos de código em módulos, conexão Interface/API/Database/Worker/Deploy, build e expansão da página real.
-- O hero é HTML renderizado no servidor e permanece no documento. A intro é um overlay fixo removido ao terminar; não cria pin, spacer nem percurso adicional de scroll.
-- O reveal usa a página real numa janela recortada que se expande. Não carrega vídeo nem bibliotecas novas.
-- Estados: idle, playing, skipping, finishing e complete. O bloqueio de scroll e o atributo inert do conteúdo são restaurados no término, pulo, falha e desmontagem.
-- Controles de som e pulo acessíveis, foco contido, Escape para pular e foco devolvido ao hero. Cenas decorativas usam aria-hidden.
-- Reproduz em toda entrada/recarregamento da home, inclusive com âncora. Sem bloqueio por sessionStorage ou necessidade de query param.
-- O boot já vem visível no HTML do servidor, antes da hidratação; JavaScript desativado libera a home via noscript. Se a hidratação não iniciar, o overlay idle perde visibilidade após 10 s.
-- Reduced motion dispensa a sequência. Mudança para essa preferência durante a execução libera a página.
-- Falha no carregamento/animação libera a homepage; watchdog independente encerra qualquer espera em 10 s.
+- Timeline automática de 7,75 s no desktop/tablet e aproximadamente 5,46 s no mobile, após carregar GSAP e as fontes.
+- Boot, editor, módulos de interface, prévia real do site, conexão dos serviços, build e expansão da prévia até preencher a tela.
+- O conteúdo é renderizado no servidor. Durante a prévia, sua área animada fica limitada à altura da tela; o restante da página não aumenta a superfície transformada.
+- Ao concluir, o overlay é ocultado antes de restaurar estilos e rolagem. A largura reservada à barra de rolagem permanece estável. A página não ganha pin, spacer ou percurso adicional de scroll.
+- As animações de rolagem são inicializadas depois da abertura, com dois frames para permitir a pintura da página final. Replays interrompem essas animações e as reinicializam após a abertura.
+- Estados: idle, playing, skipping, finishing e complete. Scroll e inert são restaurados no término, pulo, falha e desmontagem.
+- Controles de som e pulo acessíveis, foco contido e Escape para pular. Após interação por teclado, o foco volta ao elemento anterior ou à seção inicial, sem contorno decorativo. O título não recebe foco programático. Links e botões preservam seus indicadores de foco.
+- Reproduz em toda entrada/recarregamento da home. Âncoras são respeitadas após a abertura; o botão de replay retorna ao início.
+- O boot vem visível no HTML do servidor. JavaScript desativado libera a home via noscript; caso a hidratação não inicie, o overlay idle perde visibilidade após 10 s.
+- Reduced motion dispensa a sequência. Alterar essa preferência durante a execução também libera a página.
+- Falhas no carregamento/animação liberam a homepage; watchdog independente encerra qualquer espera em 10 s.
 
 ## Organização
 
-`intro.tsx`: hero estático. `intro/cinematic-intro.tsx`: ciclo de vida, estado, foco e bloqueio. `intro/scenes.tsx`: elementos visuais. `intro/timeline.ts`: direção temporal. `sound-control.tsx`: controle compartilhado com o header. `audio.ts`: sons de ruído filtrado, transientes, acordes e sweeps, com opt-in, volume baixo e rate limit.
+- `intro.tsx`: hero real do portfólio.
+- `intro/cinematic-intro.tsx`: ciclo de vida, foco, bloqueio e eventos de início/conclusão.
+- `intro/scenes.tsx`: cenas decorativas, com aria-hidden.
+- `intro/timeline.ts`: direção temporal e transformação da página real.
+- `motion.tsx`: animações de rolagem, medidas após a conclusão.
+- `sound-control.tsx` e `audio.ts`: áudio compartilhado com o header, ativado somente pelo usuário.
 
 ## Verificação
 
-`tests/e2e/opening.spec.ts` cobre conclusão automática em 1440/768/390 px, scroll restaurado, replay em refresh, primeira pintura, pulo, reduced motion, áudio compartilhado, teclado e falha de chunk GSAP. Os testes antigos de pin/spacer/scroll de 1850 px foram removidos. `tests/e2e/flows.spec.ts` preserva as verificações administrativas e de navegação/áudio.
+`tests/e2e/opening.spec.ts` cobre 1440, 768, 390 e 320 px, conclusão automática, refresh, replay, teclado, áudio, âncoras, menu mobile, reduced motion, JavaScript desativado e navegação para projetos.
 
-Validação da correção de primeira pintura e replay: lint e typecheck sem erros; 25 testes Vitest aprovados com os binários PDF disponíveis; 11 testes de abertura Playwright aprovados no servidor standalone de produção; build aprovado. A suíte cobre 1440, 768 e 390 px, reduced motion, JavaScript atrasado e JavaScript desativado. Na implementação inicial também foram aprovados os testes dos fluxos administrativos e inspecionada visualmente a montagem/reveal. Nenhuma dependência adicionada, migration ou alteração de API/admin.
+Os testes também comparam a geometria do título na prévia com a página final, verificam continuidade inferior a 1 px no frame de liberação, limitam a prévia à altura da tela e confirmam que nenhum estilo temporário, inert ou foco no título permanece. Capturas da prévia e da página final são produzidas nos testes de desktop e mobile.
+
+Execute com o servidor local iniciado: `TEST_BASE_URL=http://localhost:3100 npx playwright test tests/e2e/opening.spec.ts`.

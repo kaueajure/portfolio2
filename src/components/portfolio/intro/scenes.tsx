@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 export function OpeningScenes() {
   return (
     <div className="opening-art" aria-hidden="true">
@@ -69,46 +67,17 @@ export function OpeningScenes() {
         </div>
       </div>
       <div className="opening-layout">
-        <div className="opening-module module-header">
-          <code>{"<Header />"}</code>
-          <span>
-            <strong>KA&nbsp; Kauê Ajure</strong>
-            <i>Projetos &nbsp; Sobre &nbsp; Stack &nbsp; Contato</i>
-          </span>
-        </div>
-        <div className="opening-module module-hero">
-          <code>{"<HeroTitle />"}</code>
-          <small>Desenvolvedor full-stack</small>
-          <span>
-            Kauê <em>Ajure</em>
-            <b>.</b>
-          </span>
-        </div>
-        <div className="opening-module module-copy">
-          <code>{"<HeroCopy />"}</code>
-          <span>
-            Produtos digitais com interfaces pensadas para pessoas e
-            estrutura para funcionar de ponta a ponta.
-          </span>
-          <p>Ver projetos &nbsp; ↘</p>
-        </div>
-        <div className="opening-module module-visual">
-          <code>{"<ProjectPreview />"}</code>
-          <Image
-            src="/projects/flixa-home.png"
-            width={1440}
-            height={900}
-            alt=""
-            sizes="(max-width: 600px) 85vw, 55vw"
-          />
-        </div>
-        <div className="opening-module module-note">
-          <code>{"<HeroNote />"}</code>
-          <span>
-            Interfaces reais. Decisões por trás delas.{" "}
-            <i>Explorar trabalhos ↓</i>
-          </span>
-        </div>
+        {[
+          ["module-header", "<Header />"],
+          ["module-hero", "<HeroTitle />"],
+          ["module-copy", "<HeroCopy />"],
+          ["module-visual", "<ProjectPreview />"],
+          ["module-note", "<HeroNote />"],
+        ].map(([name, label]) => (
+          <div className={`opening-module ${name}`} key={name}>
+            <code>{label}</code>
+          </div>
+        ))}
       </div>
       <div className="opening-backend">
         <div className="opening-request">
