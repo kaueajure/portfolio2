@@ -4,8 +4,9 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 
 ## Comportamento
 
-- Timeline automática de 7,75 s no desktop/tablet e aproximadamente 5,46 s no mobile, após carregar GSAP e as fontes.
+- Timeline automática de 8,35 s no desktop/tablet e aproximadamente 5,88 s no mobile, após carregar GSAP e as fontes.
 - Boot, editor, módulos de interface, prévia real do site, conexão dos serviços, build e expansão da prévia até preencher a tela.
+- Todos os módulos concluem sua expansão antes de iniciar a prévia. O site é medido e preparado atrás do fundo opaco no início da timeline; a passagem usa opacidade do fundo e dos módulos, sem mudar o layout ou remover o fundo abruptamente no meio da cena.
 - O conteúdo é renderizado no servidor. Durante a prévia, sua área animada fica limitada à altura da tela; o restante da página não aumenta a superfície transformada.
 - Ao concluir, o overlay é ocultado antes de restaurar estilos e rolagem. A largura reservada à barra de rolagem permanece estável. A página não ganha pin, spacer ou percurso adicional de scroll.
 - As animações de rolagem são inicializadas depois da abertura, com dois frames para permitir a pintura da página final. Replays interrompem essas animações e as reinicializam após a abertura.
@@ -14,7 +15,7 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 - Reproduz em toda entrada/recarregamento da home. Âncoras são respeitadas após a abertura; o botão de replay retorna ao início.
 - O boot vem visível no HTML do servidor. JavaScript desativado libera a home via noscript; caso a hidratação não inicie, o overlay idle perde visibilidade após 10 s.
 - Reduced motion dispensa a sequência. Alterar essa preferência durante a execução também libera a página.
-- Falhas no carregamento/animação liberam a homepage; watchdog independente encerra qualquer espera em 10 s.
+- Falhas no carregamento/animação liberam a homepage. O watchdog limita o carregamento a 10 s; quando a timeline começa, passa a usar sua duração mais 2 s de margem para evitar cortar cenas.
 
 ## Organização
 
@@ -30,5 +31,7 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 `tests/e2e/opening.spec.ts` cobre 1440, 768, 390 e 320 px, conclusão automática, refresh, replay, teclado, áudio, âncoras, menu mobile, reduced motion, JavaScript desativado e navegação para projetos.
 
 Os testes também comparam a geometria do título na prévia com a página final, verificam continuidade inferior a 1 px no frame de liberação, limitam a prévia à altura da tela e confirmam que nenhum estilo temporário, inert ou foco no título permanece. Capturas da prévia e da página final são produzidas nos testes de desktop e mobile.
+
+Testes adicionais em desktop e mobile verificam que todos os módulos já chegaram ao tamanho e à posição finais quando a prévia começa e que o fundo desaparece gradualmente.
 
 Execute com o servidor local iniciado: `TEST_BASE_URL=http://localhost:3100 npx playwright test tests/e2e/opening.spec.ts`.

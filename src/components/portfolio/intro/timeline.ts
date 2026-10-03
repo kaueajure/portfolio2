@@ -11,12 +11,38 @@ export function openingTimeline(
   const q = gsap.utils.selector(root);
   const mobile = window.matchMedia("(max-width: 600px)").matches;
   const layout = root.querySelector<HTMLElement>(".opening-layout")!;
-  const camera = { x: 0, y: 0, scale: 1 };
+  const modules = gsap.utils.toArray<HTMLElement>(q(".opening-module"));
+  // Measure before animation writes; no layout work is needed at the handoff.
+  const editor = root.querySelector(".opening-editor")!.getBoundingClientRect();
+  const boxes = modules.map((el) => el.getBoundingClientRect());
+  const box = layout.getBoundingClientRect();
+  const width = page.clientWidth;
+  const height = window.innerHeight;
+  const scale = Math.min(box.width / width, box.height / height);
   const packetTravel = root.querySelector(".opening-services")!.clientWidth - 8;
+  const assemblyStart = 2.5;
+  const moduleDuration = 0.85;
+  const moduleStagger = 0.09;
+  const assemblyEnd =
+    assemblyStart + moduleDuration + (modules.length - 1) * moduleStagger;
+  // Prepare the bounded page while the opaque opening still covers it.
+  page.style.setProperty("--opening-width", `${width}px`);
+  page.style.setProperty("--opening-height", `${height}px`);
+  gsap.set(page, {
+    x: box.left + (box.width - width * scale) / 2,
+    y: box.top + (box.height - height * scale) / 2,
+    scale,
+    opacity: 1,
+    transformOrigin: "0 0",
+    borderRadius: 16,
+  });
+  page.setAttribute("data-opening-prepared", "");
   const tl = gsap.timeline({
     defaults: { ease: "power3.inOut" },
     onComplete: complete,
   });
+  tl.addLabel("preview", assemblyEnd + 0.09);
+  tl.addLabel("backend", "preview+=0.6");
   tl.from(q(".opening-boot"), { y: 16, opacity: 0, duration: 0.4 }, 0)
     .from(
       q(".opening-boot small"),
@@ -69,9 +95,6 @@ export function openingTimeline(
       2.45,
     );
   // The same code-labelled rectangles travel from the editor and expand into layout modules.
-  const modules = gsap.utils.toArray<HTMLElement>(q(".opening-module"));
-  const editor = root.querySelector(".opening-editor")!.getBoundingClientRect();
-  const boxes = modules.map((el) => el.getBoundingClientRect());
   modules.forEach((el, i) => {
     const box = boxes[i];
     tl.from(
@@ -84,92 +107,73 @@ export function openingTimeline(
         backgroundColor: "#263c4b",
         borderRadius: 0,
         opacity: 0,
-        duration: 0.85,
+        duration: moduleDuration,
         ease: "expo.inOut",
       },
-      2.5 + i * 0.09,
+      assemblyStart + i * moduleStagger,
     );
   });
   tl.call(() => audioEngine.play("snap"), [], 2.8)
-    .call(
-      () => {
-        // Use the live page for the preview, preserving its viewport layout.
-        const box = layout.getBoundingClientRect();
-        const width = page.clientWidth;
-        const height = window.innerHeight;
-        camera.scale = Math.min(box.width / width, box.height / height);
-        camera.x = box.left + (box.width - width * camera.scale) / 2;
-        camera.y = box.top + (box.height - height * camera.scale) / 2;
-        page.style.setProperty("--opening-width", `${width}px`);
-        page.style.setProperty("--opening-height", `${height}px`);
-        preview();
-      },
-      [],
-      3.05,
-    )
-    .set(
-      page,
-      {
-        x: () => camera.x,
-        y: () => camera.y,
-        scale: () => camera.scale,
-        transformOrigin: "0 0",
-        borderRadius: 16,
-      },
-      3.05,
-    )
-    .fromTo(
-      page,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.45, immediateRender: false },
-      3.05,
+    .call(preview, [], "preview")
+    .to(
+      q(".opening-backdrop"),
+      { opacity: 0, duration: 0.45, ease: "none" },
+      "preview",
     )
     .to(
       q(".opening-layout, .opening-grid"),
-      { opacity: 0, duration: 0.35 },
-      3.1,
+      { opacity: 0, duration: 0.45, ease: "none" },
+      "preview",
     )
     .to(
       q(".opening-workspace"),
       { opacity: 0, scale: 0.6, duration: 0.5 },
-      3.15,
+      "preview",
     )
-    .from(q(".opening-backend"), { y: 45, opacity: 0, duration: 0.45 }, 3.8)
+    .from(
+      q(".opening-backend"),
+      { y: 45, opacity: 0, duration: 0.45 },
+      "backend",
+    )
     .from(
       q(".opening-services > div"),
       { scale: 0.8, opacity: 0, stagger: 0.07, duration: 0.3 },
-      3.95,
+      "backend+=0.15",
     )
     .fromTo(
       q(".opening-packet"),
       { x: 0 },
       { x: packetTravel, duration: 0.65, ease: "power2.inOut" },
-      4.2,
+      "backend+=0.4",
     )
     .from(
       q(".opening-query"),
       { clipPath: "inset(0 100% 0 0)", duration: 0.45 },
-      4.65,
+      "backend+=0.85",
     )
-    .call(() => audioEngine.play("request"), [], 4.2)
-    .to(q(".opening-backend"), { y: 40, opacity: 0, duration: 0.4 }, 5.25)
+    .call(() => audioEngine.play("request"), [], "backend+=0.4")
+    .to(
+      q(".opening-backend"),
+      { y: 40, opacity: 0, duration: 0.4 },
+      "backend+=1.45",
+    )
     .from(
       q(".opening-build > span"),
       { y: 15, opacity: 0, stagger: 0.09, duration: 0.25 },
-      5.3,
+      "backend+=1.5",
     )
     .from(
       q(".opening-build strong"),
       { scale: 0.8, opacity: 0, duration: 0.45, ease: "expo.out" },
-      5.8,
+      "backend+=2",
     )
-    .call(() => audioEngine.play("build"), [], 5.85)
-    .call(finishing, [], 6.1)
-    .call(() => audioEngine.play("reveal"), [], 6.1)
+    .call(() => audioEngine.play("build"), [], "backend+=2.05")
+    .call(finishing, [], "backend+=2.3")
+    .call(() => audioEngine.play("reveal"), [], "backend+=2.3")
     .to(
       q(".opening-art"),
       { opacity: 0, duration: 0.55, ease: "power1.inOut" },
-      6.1,
+      "backend+=2.3",
     )
     .to(
       page,
@@ -181,9 +185,9 @@ export function openingTimeline(
         duration: 1.65,
         ease: "expo.inOut",
       },
-      6.1,
+      "backend+=2.3",
     )
-    .to(q(".opening-controls"), { opacity: 0, duration: 0.35 }, 7.1);
+    .to(q(".opening-controls"), { opacity: 0, duration: 0.35 }, "backend+=3.3");
   gsap.set(q(".opening-art"), { visibility: "visible" });
   if (mobile) tl.timeScale(1.42);
   return tl;

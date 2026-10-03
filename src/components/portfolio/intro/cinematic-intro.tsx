@@ -59,6 +59,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       if (saved.pageStyle === null) page.removeAttribute("style");
       else page.setAttribute("style", saved.pageStyle);
       page.removeAttribute("data-opening-reveal");
+      page.removeAttribute("data-opening-prepared");
       document.documentElement.removeAttribute("data-opening-lock");
     };
     const complete = () => {
@@ -163,6 +164,12 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
               () => setState("finishing"),
               complete,
             );
+            // Keep the loading watchdog, then allow the complete scene sequence.
+            clearTimeout(timeout);
+            timeout = setTimeout(
+              complete,
+              timeline.totalDuration() * 1000 + 2000,
+            );
           });
           skipAction.current = () => {
             if (finished) return;
@@ -174,7 +181,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
               duration: 0.3,
               ease: "power2.out",
             });
-            if (page.hasAttribute("data-opening-reveal"))
+            if (page.hasAttribute("data-opening-prepared"))
               exitTween.to(
                 page,
                 {
@@ -217,6 +224,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       aria-modal="true"
       aria-label="Abertura do portfólio"
     >
+      <div className="opening-backdrop" aria-hidden="true" />
       <OpeningScenes />
       <div className="opening-controls">
         <SoundControl />

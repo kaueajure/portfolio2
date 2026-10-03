@@ -1,7 +1,7 @@
 html[data-opening-lock] body {
   background: #171a1e;
 }
-#portfolio-page[data-opening-reveal] {
+#portfolio-page[data-opening-prepared] {
   position: fixed;
   inset: 0 auto auto 0;
   width: var(--opening-width);
@@ -12,17 +12,19 @@ html[data-opening-lock] body {
   will-change: transform;
   pointer-events: none;
 }
-.cinematic-opening[data-page-preview] {
-  background: transparent;
-}
 .cinematic-opening {
   position: fixed;
   inset: 0;
   z-index: 101;
   overflow: hidden;
-  background: #171a1e;
   color: #eef1f3;
   perspective: 1200px;
+}
+.opening-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #171a1e;
+  pointer-events: none;
 }
 /* Server-rendered boot covers the hero before React/GSAP load. The idle-only
    deadline also exposes the page if hydration never starts. */

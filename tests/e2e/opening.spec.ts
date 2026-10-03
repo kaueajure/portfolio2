@@ -1,6 +1,76 @@
 import { test, expect, type Page } from "@playwright/test";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
+for (const width of [1440, 390]) {
+  test(`site preview waits for complete modules at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    const modules = await page.evaluate(
+      () =>
+        new Promise<
+          {
+            opacity: number;
+            x: number;
+            y: number;
+            scaleX: number;
+            scaleY: number;
+          }[]
+        >((resolve) => {
+          const sample = () => {
+            const page = document.getElementById("portfolio-page")!;
+            if (
+              page.hasAttribute("data-opening-reveal") &&
+              Number(getComputedStyle(page).opacity) > 0.01
+            ) {
+              resolve(
+                Array.from(
+                  document.querySelectorAll(".opening-module"),
+                  (element) => {
+                    const style = getComputedStyle(element);
+                    const matrix = new DOMMatrixReadOnly(style.transform);
+                    return {
+                      opacity: Number(style.opacity),
+                      x: matrix.m41,
+                      y: matrix.m42,
+                      scaleX: matrix.m11,
+                      scaleY: matrix.m22,
+                    };
+                  },
+                ),
+              );
+            } else requestAnimationFrame(sample);
+          };
+          sample();
+        }),
+    );
+    expect(modules).toHaveLength(5);
+    for (const item of modules) {
+      expect(item.opacity).toBe(1);
+      expect(Math.abs(item.x)).toBeLessThan(0.1);
+      expect(Math.abs(item.y)).toBeLessThan(0.1);
+      expect(item.scaleX).toBeCloseTo(1, 3);
+      expect(item.scaleY).toBeCloseTo(1, 3);
+    }
+    // A real intermediate opacity proves the backdrop dissolves instead of cutting.
+    const backdropOpacity = await page.locator(".opening-backdrop").evaluate(
+      (element) =>
+        new Promise<number>((resolve, reject) => {
+          const sample = () => {
+            const opacity = Number(getComputedStyle(element).opacity);
+            if (opacity > 0 && opacity < 0.8) resolve(opacity);
+            else if (!element.isConnected || opacity === 0)
+              reject(new Error("Backdrop cut before a fade frame"));
+            else requestAnimationFrame(sample);
+          };
+          sample();
+        }),
+    );
+    expect(backdropOpacity).toBeGreaterThan(0);
+    expect(backdropOpacity).toBeLessThan(0.8);
+  });
+}
 for (const width of [1440, 768, 390, 320]) {
   test(`intro concludes and replays on refresh at ${width}px`, async ({
     page,
@@ -11,6 +81,7 @@ for (const width of [1440, 768, 390, 320]) {
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
     const preview = page.locator("#portfolio-page[data-opening-reveal]");
     await expect(preview).toHaveCSS("opacity", "1");
+    await expect(page.locator(".opening-backdrop")).toHaveCSS("opacity", "0");
     const previewTitle = await preview.evaluate((element) => {
       const box = element.getBoundingClientRect();
       const title = element
@@ -56,6 +127,9 @@ for (const width of [1440, 768, 390, 320]) {
       expect(Math.abs(title![key] - previewTitle[key])).toBeLessThan(1);
     await expect(page.locator("#hero-title")).not.toBeFocused();
     await expect(page.locator("#portfolio-page")).not.toHaveAttribute("style");
+    await expect(page.locator("#portfolio-page")).not.toHaveAttribute(
+      "data-opening-prepared",
+    );
     await expect(page.locator("#portfolio-page")).not.toHaveAttribute("inert");
     if (width === 1440 || width === 390)
       await page.screenshot({ path: testInfo.outputPath("final.png") });
