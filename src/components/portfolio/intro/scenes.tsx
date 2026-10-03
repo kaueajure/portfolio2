@@ -66,19 +66,7 @@ export function OpeningScenes() {
           </div>
         </div>
       </div>
-      <div className="opening-layout">
-        {[
-          ["module-header", "<Header />"],
-          ["module-hero", "<HeroTitle />"],
-          ["module-copy", "<HeroCopy />"],
-          ["module-visual", "<ProjectPreview />"],
-          ["module-note", "<HeroNote />"],
-        ].map(([name, label]) => (
-          <div className={`opening-module ${name}`} key={name}>
-            <code>{label}</code>
-          </div>
-        ))}
-      </div>
+      <div className="opening-preview-anchor" />
       <div className="opening-backend">
         <div className="opening-request">
           POST /api/projects <span>{'{ "status": "ready" }'}</span>

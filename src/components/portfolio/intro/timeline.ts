@@ -10,21 +10,21 @@ export function openingTimeline(
 ) {
   const q = gsap.utils.selector(root);
   const mobile = window.matchMedia("(max-width: 600px)").matches;
-  const layout = root.querySelector<HTMLElement>(".opening-layout")!;
-  const modules = gsap.utils.toArray<HTMLElement>(q(".opening-module"));
+  const anchor = root.querySelector<HTMLElement>(".opening-preview-anchor")!;
+  const parts = Array.from(
+    page.querySelectorAll<HTMLElement>("[data-opening-part]"),
+  );
   // Measure before animation writes; no layout work is needed at the handoff.
-  const editor = root.querySelector(".opening-editor")!.getBoundingClientRect();
-  const boxes = modules.map((el) => el.getBoundingClientRect());
-  const box = layout.getBoundingClientRect();
+  const box = anchor.getBoundingClientRect();
   const width = page.clientWidth;
   const height = window.innerHeight;
   const scale = Math.min(box.width / width, box.height / height);
   const packetTravel = root.querySelector(".opening-services")!.clientWidth - 8;
   const assemblyStart = 2.5;
-  const moduleDuration = 0.85;
-  const moduleStagger = 0.09;
+  const partDuration = 0.85;
+  const partStagger = 0.09;
   const assemblyEnd =
-    assemblyStart + moduleDuration + (modules.length - 1) * moduleStagger;
+    assemblyStart + partDuration + (parts.length - 1) * partStagger;
   // Prepare the bounded page while the opaque opening still covers it.
   page.style.setProperty("--opening-width", `${width}px`);
   page.style.setProperty("--opening-height", `${height}px`);
@@ -41,8 +41,8 @@ export function openingTimeline(
     defaults: { ease: "power3.inOut" },
     onComplete: complete,
   });
-  tl.addLabel("preview", assemblyEnd + 0.09);
-  tl.addLabel("backend", "preview+=0.6");
+  tl.addLabel("preview", assemblyStart);
+  tl.addLabel("backend", assemblyEnd + 0.6);
   tl.from(q(".opening-boot"), { y: 16, opacity: 0, duration: 0.4 }, 0)
     .from(
       q(".opening-boot small"),
@@ -81,36 +81,21 @@ export function openingTimeline(
       { y: 10, opacity: 0, duration: 0.25 },
       1.95,
     )
-    .call(() => audioEngine.play("code"), [], 1.4)
-    .to(
-      q(".opening-workspace"),
+    .call(() => audioEngine.play("code"), [], 1.4);
+  // Assemble the live hero once, then expand that same page to the viewport.
+  parts.forEach((part, i) => {
+    tl.fromTo(
+      part,
+      { y: 24, scale: 0.96, opacity: 0, transformOrigin: "50% 50%" },
       {
-        xPercent: mobile ? 0 : -18,
-        yPercent: mobile ? -25 : -8,
-        scale: 0.8,
-        rotationY: mobile ? 0 : -18,
-        opacity: 0.25,
-        duration: 0.8,
+        y: 0,
+        scale: 1,
+        opacity: 1,
+        duration: partDuration,
+        ease: "power3.out",
+        immediateRender: true,
       },
-      2.45,
-    );
-  // The same code-labelled rectangles travel from the editor and expand into layout modules.
-  modules.forEach((el, i) => {
-    const box = boxes[i];
-    tl.from(
-      el,
-      {
-        x: editor.left + 30 - box.left,
-        y: editor.top + 110 + i * 22 - box.top,
-        scaleX: Math.min(280 / box.width, 1),
-        scaleY: 24 / box.height,
-        backgroundColor: "#263c4b",
-        borderRadius: 0,
-        opacity: 0,
-        duration: moduleDuration,
-        ease: "expo.inOut",
-      },
-      assemblyStart + i * moduleStagger,
+      assemblyStart + i * partStagger,
     );
   });
   tl.call(() => audioEngine.play("snap"), [], 2.8)
@@ -121,14 +106,22 @@ export function openingTimeline(
       "preview",
     )
     .to(
-      q(".opening-layout, .opening-grid"),
+      q(".opening-grid"),
       { opacity: 0, duration: 0.45, ease: "none" },
       "preview",
     )
     .to(
       q(".opening-workspace"),
-      { opacity: 0, scale: 0.6, duration: 0.5 },
-      "preview",
+      {
+        xPercent: mobile ? 0 : -18,
+        yPercent: mobile ? -25 : -8,
+        rotationY: mobile ? 0 : -18,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.25,
+        ease: "power2.inOut",
+      },
+      "preview-=0.25",
     )
     .from(
       q(".opening-backend"),

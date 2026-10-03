@@ -2,73 +2,71 @@ import { test, expect, type Page } from "@playwright/test";
 const overlay = (page: Page) =>
   page.getByRole("dialog", { name: "Abertura do portfólio" });
 for (const width of [1440, 390]) {
-  test(`site preview waits for complete modules at ${width}px`, async ({
+  test(`one real hero assembles and expands at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
-    const modules = await page.evaluate(
+    await expect(page.locator(".opening-layout, .opening-module")).toHaveCount(
+      0,
+    );
+    await expect(page.locator("html")).toHaveAttribute("data-opening-lock");
+    const result = await page.evaluate(
       () =>
-        new Promise<
-          {
-            opacity: number;
-            x: number;
-            y: number;
-            scaleX: number;
-            scaleY: number;
-          }[]
-        >((resolve) => {
+        new Promise<{
+          assembled: boolean;
+          sameElements: boolean;
+          stablePreview: boolean;
+          cleanParts: boolean;
+        }>((resolve) => {
+          const site = document.getElementById("portfolio-page")!;
+          const title = document.getElementById("hero-title")!;
+          const parts = Array.from(
+            site.querySelectorAll<HTMLElement>("[data-opening-part]"),
+          );
+          let assembled = false;
+          let sameElements = true;
+          let stablePreview = true;
+          let firstBounds: number[] | undefined;
           const sample = () => {
-            const page = document.getElementById("portfolio-page")!;
+            sameElements &&=
+              title === document.getElementById("hero-title") &&
+              parts.every((part) => part.isConnected && site.contains(part));
+            assembled ||= parts.some((part) => {
+              const opacity = Number(getComputedStyle(part).opacity);
+              return opacity > 0.01 && opacity < 1;
+            });
             if (
-              page.hasAttribute("data-opening-reveal") &&
-              Number(getComputedStyle(page).opacity) > 0.01
+              site.hasAttribute("data-opening-reveal") &&
+              document.querySelector('.cinematic-opening[data-state="playing"]')
             ) {
-              resolve(
-                Array.from(
-                  document.querySelectorAll(".opening-module"),
-                  (element) => {
-                    const style = getComputedStyle(element);
-                    const matrix = new DOMMatrixReadOnly(style.transform);
-                    return {
-                      opacity: Number(style.opacity),
-                      x: matrix.m41,
-                      y: matrix.m42,
-                      scaleX: matrix.m11,
-                      scaleY: matrix.m22,
-                    };
-                  },
-                ),
+              const box = site.getBoundingClientRect();
+              const bounds = [box.x, box.y, box.width, box.height];
+              firstBounds ??= bounds;
+              stablePreview &&= bounds.every(
+                (value, index) => Math.abs(value - firstBounds![index]) < 0.1,
               );
-            } else requestAnimationFrame(sample);
+            }
+            if (document.documentElement.hasAttribute("data-opening-lock"))
+              requestAnimationFrame(sample);
+            else
+              resolve({
+                assembled,
+                sameElements,
+                stablePreview,
+                cleanParts: parts.every((part) => !part.hasAttribute("style")),
+              });
           };
           sample();
         }),
     );
-    expect(modules).toHaveLength(5);
-    for (const item of modules) {
-      expect(item.opacity).toBe(1);
-      expect(Math.abs(item.x)).toBeLessThan(0.1);
-      expect(Math.abs(item.y)).toBeLessThan(0.1);
-      expect(item.scaleX).toBeCloseTo(1, 3);
-      expect(item.scaleY).toBeCloseTo(1, 3);
-    }
-    // A real intermediate opacity proves the backdrop dissolves instead of cutting.
-    const backdropOpacity = await page.locator(".opening-backdrop").evaluate(
-      (element) =>
-        new Promise<number>((resolve, reject) => {
-          const sample = () => {
-            const opacity = Number(getComputedStyle(element).opacity);
-            if (opacity > 0 && opacity < 0.8) resolve(opacity);
-            else if (!element.isConnected || opacity === 0)
-              reject(new Error("Backdrop cut before a fade frame"));
-            else requestAnimationFrame(sample);
-          };
-          sample();
-        }),
-    );
-    expect(backdropOpacity).toBeGreaterThan(0);
-    expect(backdropOpacity).toBeLessThan(0.8);
+    expect(result).toEqual({
+      assembled: true,
+      sameElements: true,
+      stablePreview: true,
+      cleanParts: true,
+    });
+    await expect(page.locator("#hero-title")).not.toBeFocused();
   });
 }
 for (const width of [1440, 768, 390, 320]) {
@@ -81,7 +79,14 @@ for (const width of [1440, 768, 390, 320]) {
     await expect(overlay(page)).toHaveAttribute("data-state", "playing");
     const preview = page.locator("#portfolio-page[data-opening-reveal]");
     await expect(preview).toHaveCSS("opacity", "1");
+    if (width === 1440 || width === 390)
+      await page.screenshot({ path: testInfo.outputPath("assembly.png") });
     await expect(page.locator(".opening-backdrop")).toHaveCSS("opacity", "0");
+    await expect(page.locator("[data-opening-part]").last()).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await expect(page.locator(".opening-workspace")).toHaveCSS("opacity", "0");
     const previewTitle = await preview.evaluate((element) => {
       const box = element.getBoundingClientRect();
       const title = element
@@ -170,6 +175,8 @@ test("skip and Escape release focus and scrolling", async ({ page }) => {
   await expect(overlay(page)).toBeHidden();
   await expect(page.locator("#hero-title")).not.toBeFocused();
   await expect(page.locator("#portfolio-page")).not.toHaveAttribute("style");
+  for (const part of await page.locator("[data-opening-part]").all())
+    await expect(part).not.toHaveAttribute("style");
   await expect(page.locator("html")).not.toHaveAttribute("data-opening-lock");
 });
 test("audio remains opt-in across skip", async ({ page }) => {

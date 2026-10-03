@@ -5,8 +5,9 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 ## Comportamento
 
 - Timeline automática de 8,35 s no desktop/tablet e aproximadamente 5,88 s no mobile, após carregar GSAP e as fontes.
-- Boot, editor, módulos de interface, prévia real do site, conexão dos serviços, build e expansão da prévia até preencher a tela.
-- Todos os módulos concluem sua expansão antes de iniciar a prévia. O site é medido e preparado atrás do fundo opaco no início da timeline; a passagem usa opacidade do fundo e dos módulos, sem mudar o layout ou remover o fundo abruptamente no meio da cena.
+- Boot, editor, montagem dos elementos reais do site, conexão dos serviços, build e expansão da mesma página até preencher a tela.
+- O site é medido e preparado atrás do fundo opaco no início da timeline. Cabeçalho, metadados, título, texto, imagem e nota são animados diretamente no HTML real. Não existem painéis preenchidos imitando outro layout; a área da prévia é apenas uma âncora invisível para medir a posição da página. O fundo desaparece gradualmente durante a montagem, sem recalcular o layout nessa passagem.
+- Uma única transição encerra o editor antes de revelar o site; nenhum tween posterior volta a deixá-lo visível sobre a página.
 - O conteúdo é renderizado no servidor. Durante a prévia, sua área animada fica limitada à altura da tela; o restante da página não aumenta a superfície transformada.
 - Ao concluir, o overlay é ocultado antes de restaurar estilos e rolagem. A largura reservada à barra de rolagem permanece estável. A página não ganha pin, spacer ou percurso adicional de scroll.
 - As animações de rolagem são inicializadas depois da abertura, com dois frames para permitir a pintura da página final. Replays interrompem essas animações e as reinicializam após a abertura.
@@ -32,6 +33,6 @@ A abertura monta visualmente uma interface e revela a página real do portfólio
 
 Os testes também comparam a geometria do título na prévia com a página final, verificam continuidade inferior a 1 px no frame de liberação, limitam a prévia à altura da tela e confirmam que nenhum estilo temporário, inert ou foco no título permanece. Capturas da prévia e da página final são produzidas nos testes de desktop e mobile.
 
-Testes adicionais em desktop e mobile verificam que todos os módulos já chegaram ao tamanho e à posição finais quando a prévia começa e que o fundo desaparece gradualmente.
+Testes adicionais em desktop e mobile verificam que os painéis fictícios não existem, que a montagem usa os mesmos elementos da página final, que a prévia mantém posição e tamanho durante a montagem e que os estilos temporários de seus componentes são removidos, inclusive ao pular a abertura.
 
 Execute com o servidor local iniciado: `TEST_BASE_URL=http://localhost:3100 npx playwright test tests/e2e/opening.spec.ts`.

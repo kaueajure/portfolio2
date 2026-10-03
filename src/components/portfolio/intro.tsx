@@ -10,18 +10,18 @@ export function Intro() {
       aria-labelledby="hero-title"
     >
       <div className={styles.container}>
-        <div className={styles.heroTop}>
+        <div className={styles.heroTop} data-opening-part>
           <span>Desenvolvedor full-stack</span>
           <span className={styles.availability}>
             Projetos de produto e operação
           </span>
         </div>
-        <h1 id="hero-title" className={styles.heroName}>
+        <h1 id="hero-title" className={styles.heroName} data-opening-part>
           <span>Kauê</span> <span>Ajure</span>
           <span className={styles.period}>.</span>
         </h1>
         <div className={styles.heroGrid}>
-          <div className={styles.heroCopy}>
+          <div className={styles.heroCopy} data-opening-part>
             <p>
               Produtos digitais com interfaces pensadas para pessoas e estrutura
               para funcionar de ponta a ponta.
@@ -35,7 +35,7 @@ export function Intro() {
               </a>
             </div>
           </div>
-          <figure className={styles.heroVisual}>
+          <figure className={styles.heroVisual} data-opening-part>
             <div className={styles.heroScreen}>
               <Image
                 src="/projects/flixa-home.png"
@@ -55,7 +55,7 @@ export function Intro() {
             </figcaption>
           </figure>
         </div>
-        <div className={styles.heroNote}>
+        <div className={styles.heroNote} data-opening-part>
           <span>Interfaces reais. Decisões por trás delas.</span>
           <a href="#projetos">
             Explorar trabalhos <span aria-hidden="true">↓</span>

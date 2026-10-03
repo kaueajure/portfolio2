@@ -45,6 +45,10 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       behavior: document.documentElement.style.scrollBehavior,
       inert: page.inert,
       pageStyle: page.getAttribute("style"),
+      parts: Array.from(
+        page.querySelectorAll<HTMLElement>("[data-opening-part]"),
+        (element) => ({ element, style: element.getAttribute("style") }),
+      ),
     };
     let keyboardInteraction = previousFocus?.matches(":focus-visible") ?? false;
     let locked = false;
@@ -58,6 +62,10 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
       page.inert = saved.inert;
       if (saved.pageStyle === null) page.removeAttribute("style");
       else page.setAttribute("style", saved.pageStyle);
+      for (const { element, style } of saved.parts) {
+        if (style === null) element.removeAttribute("style");
+        else element.setAttribute("style", style);
+      }
       page.removeAttribute("data-opening-reveal");
       page.removeAttribute("data-opening-prepared");
       document.documentElement.removeAttribute("data-opening-lock");
@@ -181,7 +189,7 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
               duration: 0.3,
               ease: "power2.out",
             });
-            if (page.hasAttribute("data-opening-prepared"))
+            if (page.hasAttribute("data-opening-prepared")) {
               exitTween.to(
                 page,
                 {
@@ -195,6 +203,18 @@ function OpeningPlayback({ replay }: { replay: boolean }) {
                 },
                 0,
               );
+              exitTween.to(
+                saved.parts.map(({ element }) => element),
+                {
+                  y: 0,
+                  scale: 1,
+                  opacity: 1,
+                  duration: 0.3,
+                  ease: "power2.out",
+                },
+                0,
+              );
+            }
           };
         })
         .catch(complete);

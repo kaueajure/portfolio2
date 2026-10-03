@@ -35,7 +35,7 @@ html[data-opening-lock] body {
   visibility: visible;
 }
 .cinematic-opening[data-state="idle"] .opening-workspace,
-.cinematic-opening[data-state="idle"] .opening-layout,
+.cinematic-opening[data-state="idle"] .opening-preview-anchor,
 .cinematic-opening[data-state="idle"] .opening-backend,
 .cinematic-opening[data-state="idle"] .opening-build {
   visibility: hidden;
@@ -168,35 +168,9 @@ html[data-opening-lock] body {
   padding: 10px 18px;
   font: 10px var(--font-mono);
 }
-.opening-layout {
+.opening-preview-anchor {
   position: absolute;
   inset: 17% 19% 28%;
-  display: grid;
-  grid-template-columns: 5fr 7fr;
-  grid-template-rows: 45px 145px minmax(0, 1fr) 30px;
-  gap: 12px;
-  perspective: 900px;
-}
-.opening-module {
-  position: relative;
-  border: 1px solid #98b6cb;
-  border-radius: 10px;
-  color: #15181c;
-  background: #eef1f3;
-  transform-origin: 0 0;
-}
-.opening-module code {
-  position: absolute;
-  left: 12px;
-  top: 6px;
-  color: #6b9fc0;
-  white-space: nowrap;
-  font: 10px var(--font-mono);
-}
-.module-header,
-.module-hero,
-.module-note {
-  grid-column: 1 / -1;
 }
 .opening-backend {
   position: absolute;
@@ -307,9 +281,8 @@ html[data-opening-lock] body {
   .opening-code small {
     width: 28px;
   }
-  .opening-layout {
+  .opening-preview-anchor {
     inset: 22% 10% 30%;
-    grid-template-rows: 40px 115px minmax(0, 1fr) 25px;
   }
   .opening-backend {
     left: 8%;
@@ -374,15 +347,8 @@ html[data-opening-lock] body {
     font-size: 8px;
     padding: 7px;
   }
-  .opening-layout {
+  .opening-preview-anchor {
     inset: 18% 8% 34%;
-    gap: 7px;
-    grid-template-columns: 1fr;
-    grid-template-rows: 31px 105px 80px minmax(0, 1fr) 19px;
-  }
-  .opening-module code {
-    font-size: 7px;
-    left: 6px;
   }
   .opening-backend {
     bottom: 19%;
